@@ -1,100 +1,372 @@
-function placeSquare(location){
+<!DOCTYPE html>
+<html lang="en">
 
-if(!selectedShip){
-return;
+<head>
+
+<meta charset="UTF-8">
+<title>ASL Battleship</title>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+text-align:center;
+background:#e8f6ff;
 }
 
-if(currentSquares.includes(location)){
-return;
+.card{
+background:white;
+border:2px solid black;
+border-radius:12px;
+padding:20px;
+margin:20px auto;
+max-width:700px;
 }
 
+button{
+padding:10px 15px;
+margin:5px;
+cursor:pointer;
+font-size:16px;
+}
 
-// First square
-if(currentSquares.length === 0){
+.game-grid{
 
-currentSquares.push(location);
+display:grid;
+grid-template-columns:35px repeat(10,35px);
+grid-template-rows:35px repeat(10,35px);
+gap:3px;
+justify-content:center;
+
+}
+
+.label{
+
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+
+}
+
+.square{
+
+width:35px;
+height:35px;
+background:#9edcff;
+border:1px solid black;
+cursor:pointer;
+
+}
+
+.preview{
+
+background:#999;
+
+}
+
+.ship{
+
+background:#555;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<h1>🤟 ASL Battleship 🚢</h1>
+
+
+<div class="card">
+
+
+<h2>🚢 Place Your Fleet</h2>
+
+
+<h3 id="message">
+Choose a ship
+</h3>
+
+
+<h3 id="progress"></h3>
+
+
+<div id="buttons">
+
+
+<button onclick="selectShip('Carrier',5)">
+Carrier (5)
+</button>
+
+
+<button onclick="selectShip('Battleship',4)">
+Battleship (4)
+</button>
+
+
+<button onclick="selectShip('Cruiser',3)">
+Cruiser (3)
+</button>
+
+
+<button onclick="selectShip('Submarine',3)">
+Submarine (3)
+</button>
+
+
+<button onclick="selectShip('Destroyer',2)">
+Destroyer (2)
+</button>
+
+
+</div>
+
+
+
+<button onclick="undoSquare()">
+↩ Undo
+</button>
+
+
+<button onclick="resetShip()">
+🧹 Reset Ship
+</button>
+
+
+<br>
+
+
+<button id="readyButton" style="display:none">
+
+✅ READY
+
+</button>
+
+
+
+<div id="board" class="game-grid"></div>
+
+
+</div>
+
+
+
+<script>
+
+
+const letters=[
+"A","B","C","D","E",
+"F","G","H","I","J"
+];
+
+
+let selectedShip=null;
+
+let currentSquares=[];
+
+let shipsPlaced=[];
+
+let direction=null;
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<title>ASL Battleship</title>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+text-align:center;
+background:#e8f6ff;
+}
+
+.card{
+background:white;
+border:2px solid black;
+border-radius:12px;
+padding:20px;
+margin:20px auto;
+max-width:700px;
+}
+
+button{
+padding:10px 15px;
+margin:5px;
+cursor:pointer;
+font-size:16px;
+}
+
+.game-grid{
+
+display:grid;
+grid-template-columns:35px repeat(10,35px);
+grid-template-rows:35px repeat(10,35px);
+gap:3px;
+justify-content:center;
+
+}
+
+.label{
+
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+
+}
+
+.square{
+
+width:35px;
+height:35px;
+background:#9edcff;
+border:1px solid black;
+cursor:pointer;
+
+}
+
+.preview{
+
+background:#999;
+
+}
+
+.ship{
+
+background:#555;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<h1>🤟 ASL Battleship 🚢</h1>
+
+
+<div class="card">
+
+
+<h2>🚢 Place Your Fleet</h2>
+
+
+<h3 id="message">
+Choose a ship
+</h3>
+
+
+<h3 id="progress"></h3>
+
+
+<div id="buttons">
+
+
+<button onclick="selectShip('Carrier',5)">
+Carrier (5)
+</button>
+
+
+<button onclick="selectShip('Battleship',4)">
+Battleship (4)
+</button>
+
+
+<button onclick="selectShip('Cruiser',3)">
+Cruiser (3)
+</button>
+
+
+<button onclick="selectShip('Submarine',3)">
+Submarine (3)
+</button>
+
+
+<button onclick="selectShip('Destroyer',2)">
+Destroyer (2)
+</button>
+
+
+</div>
+
+
+
+<button onclick="undoSquare()">
+↩ Undo
+</button>
+
+
+<button onclick="resetShip()">
+🧹 Reset Ship
+</button>
+
+
+<br>
+
+
+<button id="readyButton" style="display:none">
+
+✅ READY
+
+</button>
+
+
+
+<div id="board" class="game-grid"></div>
+
+
+</div>
+
+
+
+<script>
+
+
+const letters=[
+"A","B","C","D","E",
+"F","G","H","I","J"
+];
+
+
+let selectedShip=null;
+
+let currentSquares=[];
+
+let shipsPlaced=[];
+
+let direction=null;
+
+function undoSquare(){
+
+if(currentSquares.length>0){
+
+
+currentSquares.pop();
+
+
+
+if(currentSquares.length<2){
+
+direction=null;
+
+}
+
 
 drawBoard();
-updateText();
 
-return;
+updateProgress();
 
-}
-
-
-// Second square decides direction
-if(currentSquares.length === 1){
-
-let first=currentSquares[0];
-
-let row1=Math.floor(first/10);
-let col1=first%10;
-
-let row2=Math.floor(location/10);
-let col2=location%10;
-
-
-if(row1===row2){
-
-direction="horizontal";
-
-}
-else if(col1===col2){
-
-direction="vertical";
-
-}
-else{
-
-document.getElementById("message").textContent =
-"❌ Ships must be straight!";
-
-return;
-
-}
-
-
-currentSquares.push(location);
-
-
-if(currentSquares.length === selectedShip.size){
-
-finishShip();
-
-return;
-
-}
-
-
-drawBoard();
-updateText();
-
-return;
-
-}
-
-
-
-// Third and later squares
-
-let last=currentSquares[currentSquares.length-1];
-
-let lastRow=Math.floor(last/10);
-let lastCol=last%10;
-
-let newRow=Math.floor(location/10);
-let newCol=location%10;
-
-
-
-if(direction==="horizontal"){
-
-if(newRow!==lastRow || location!==last+1){
-
-document.getElementById("message").textContent =
-"❌ Continue straight!";
-
-return;
 
 }
 
@@ -102,82 +374,135 @@ return;
 
 
 
-if(direction==="vertical"){
 
-if(newCol!==lastCol || location!==last+10){
-
-document.getElementById("message").textContent =
-"❌ Continue straight!";
-
-return;
-
-}
-
-}
-
-
-
-currentSquares.push(location);
-
-
-
-if(currentSquares.length === selectedShip.size){
-
-finishShip();
-
-return;
-
-}
-
-
-
-drawBoard();
-updateText();
-
-
-}
-
-
-
-function finishShip(){
-
-
-let completedShip={
-
-name:selectedShip.name,
-
-positions:[...currentSquares]
-
-};
-
-
-
-shipsPlaced.push(completedShip);
-
-
-
-removeButton(selectedShip.name);
-
-
-
-document.getElementById("message").textContent =
-"🚢 "+completedShip.name+" Complete!";
-
-
-
-selectedShip=null;
+function resetShip(){
 
 currentSquares=[];
 
 direction=null;
 
 
-
-checkReady();
-
-
-
 drawBoard();
+
+updateProgress();
+
+
+document.getElementById("message").textContent =
+"Reset ship placement";
 
 
 }
+
+
+
+
+function showCurrent(){
+
+
+let squares=document.querySelectorAll(".square");
+
+
+
+currentSquares.forEach(position=>{
+
+
+if(squares[position]){
+
+
+squares[position].classList.add("preview");
+
+
+}
+
+
+});
+
+
+}
+
+
+
+
+function showShips(){
+
+
+let squares=document.querySelectorAll(".square");
+
+
+
+shipsPlaced.forEach(ship=>{
+
+
+ship.positions.forEach(position=>{
+
+
+if(squares[position]){
+
+
+squares[position].classList.add("ship");
+
+
+}
+
+
+});
+
+
+});
+
+
+}
+
+
+
+
+function removeButton(name){
+
+
+document.querySelectorAll("#buttons button")
+.forEach(button=>{
+
+
+if(button.textContent.includes(name)){
+
+
+button.remove();
+
+
+}
+
+
+});
+
+
+}
+
+
+
+
+function checkReady(){
+
+
+if(shipsPlaced.length===5){
+
+
+document.getElementById("readyButton")
+.style.display="inline-block";
+
+
+document.getElementById("message").textContent =
+"🚢 All ships ready!";
+
+
+}
+
+
+}
+
+
+
+
+// Start board
+
+drawBoard();
+
