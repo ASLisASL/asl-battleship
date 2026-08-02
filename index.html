@@ -14,28 +14,29 @@ body {
 }
 
 button {
-  font-size: 18px;
-  padding: 8px 16px;
-  margin: 10px;
-  cursor: pointer;
+  font-size:18px;
+  padding:8px 16px;
+  margin:10px;
+  cursor:pointer;
 }
 
 #message {
-  font-size: 20px;
-  font-weight: bold;
-  margin: 15px;
+  font-size:20px;
+  font-weight:bold;
+  margin:15px;
 }
 
 #status {
-  font-size: 18px;
+  font-size:18px;
+  margin-bottom:15px;
 }
 
 .game-grid {
-  display: grid;
-  grid-template-columns: 35px repeat(10, 40px);
-  grid-template-rows: 35px repeat(10, 40px);
-  gap: 4px;
-  justify-content: center;
+  display:grid;
+  grid-template-columns:35px repeat(10,40px);
+  grid-template-rows:35px repeat(10,40px);
+  gap:4px;
+  justify-content:center;
 }
 
 .label {
@@ -67,206 +68,95 @@ button {
 Find the ships!
 </div>
 
-<div id="status">
-</div>
+<div id="status"></div>
 
 <div class="game-grid" id="gameGrid"></div>
 
 
 <script>
 
-const gameGrid = document.getElementById("gameGrid");
-const message = document.getElementById("message");
-const status = document.getElementById("status");
+const gameGrid=document.getElementById("gameGrid");
+const message=document.getElementById("message");
+const status=document.getElementById("status");
 
-const letters = [
+const letters=[
 "A","B","C","D","E",
 "F","G","H","I","J"
 ];
 
 
-const shipTypes = [
-{name:"Carrier", size:5},
-{name:"Battleship", size:4},
-{name:"Cruiser", size:3},
-{name:"Submarine", size:3},
-{name:"Destroyer", size:2}
+const shipTypes=[
+{name:"Carrier",size:5},
+{name:"Battleship",size:4},
+{name:"Cruiser",size:3},
+{name:"Submarine",size:3},
+{name:"Destroyer",size:2}
 ];
 
 
-let ships = [];
+let ships=[];
+let hits=0;
+let misses=0;
+let shots=0;
 
 
 function createShips(){
 
-  ships=[];
+ships=[];
+
+shipTypes.forEach(type=>{
+
+while(true){
+
+let start=Math.floor(Math.random()*100);
+let vertical=Math.random()<0.5;
+
+let positions=[];
 
 
-  shipTypes.forEach(type=>{
+for(let i=0;i<type.size;i++){
 
-    while(true){
-
-      let start=Math.floor(Math.random()*100);
-
-      let vertical=Math.random()<0.5;
-
-      let positions=[];
-
-
-      for(let i=0;i<type.size;i++){
-
-        let pos;
-
-        if(vertical){
-          pos=start+(i*10);
-        } else {
-          pos=start+i;
-        }
-
-        positions.push(pos);
-      }
-
-
-      let valid=positions.every(pos=>{
-
-        let row=Math.floor(pos/10);
-        let col=pos%10;
-
-        return pos<100 &&
-        row<10 &&
-        col<10;
-
-      });
-
-
-      let overlap=positions.some(pos=>
-        ships.some(ship=>
-          ship.positions.includes(pos)
-        )
-      );
-
-
-      if(valid && !overlap){
-
-        ships.push({
-          name:type.name,
-          positions:positions,
-          hits:[]
-        });
-
-        break;
-
-      }
-
-    }
-
-  });
+positions.push(
+vertical ? start+(i*10) : start+i
+);
 
 }
 
 
+let valid=positions.every(pos=>{
 
-function drawBoard(){
+let row=Math.floor(pos/10);
+let col=pos%10;
 
-  gameGrid.innerHTML="";
+return pos<100 &&
+row<10 &&
+col<10;
 
-
-  gameGrid.appendChild(document.createElement("div"));
-
-
-  letters.forEach(letter=>{
-
-    let label=document.createElement("div");
-    label.className="label";
-    label.textContent=letter;
-
-    gameGrid.appendChild(label);
-
-  });
+});
 
 
-
-  for(let row=0;row<10;row++){
-
-
-    let number=document.createElement("div");
-
-    number.className="label";
-    number.textContent=row+1;
-
-    gameGrid.appendChild(number);
+let overlap=positions.some(pos=>
+ships.some(ship=>
+ship.positions.includes(pos)
+)
+);
 
 
+if(valid && !overlap){
 
-    for(let column=0;column<10;column++){
+ships.push({
+name:type.name,
+positions:positions,
+hits:[]
+});
 
+break;
 
-      let square=document.createElement("div");
+}
 
-      square.className="square";
+}
 
-
-      let location=row*10+column;
-
-      let coordinate=
-      letters[column]+(row+1);
-
-
-
-      square.onclick=function(){
-
-
-        let ship=ships.find(s=>
-          s.positions.includes(location)
-        );
-
-
-        if(ship){
-
-          square.style.background="red";
-
-
-          if(!ship.hits.includes(location)){
-            ship.hits.push(location);
-          }
-
-
-          if(ship.hits.length===ship.positions.length){
-
-            message.textContent=
-            "💥 You sank the "+ship.name+"!";
-
-          } else {
-
-            message.textContent=
-            "🚢 HIT at "+coordinate+"!";
-
-          }
-
-
-        } else {
-
-          square.style.background="white";
-
-          message.textContent=
-          "💦 MISS at "+coordinate+"!";
-
-        }
-
-
-        square.style.pointerEvents="none";
-
-
-        updateStatus();
-
-      };
-
-
-      gameGrid.appendChild(square);
-
-    }
-
-  }
+});
 
 }
 
@@ -274,21 +164,149 @@ function drawBoard(){
 
 function updateStatus(){
 
- let left=ships.filter(ship=>
- ship.hits.length<ship.positions.length
- );
+let left=ships.filter(ship=>
+ship.hits.length<ship.positions.length
+);
 
 
- status.textContent=
- "Ships left: "+left.length;
+status.textContent=
+"🚢 Ships left: "+left.length+
+" | 🎯 Hits: "+hits+
+" | 💦 Misses: "+misses+
+" | Shots: "+shots;
 
 
- if(left.length===0){
+if(left.length===0){
 
- message.textContent=
- "🎉 YOU WIN!";
+message.textContent=
+"🎉 YOU WIN!";
 
- }
+}
+
+}
+
+
+
+function drawBoard(){
+
+gameGrid.innerHTML="";
+
+
+gameGrid.appendChild(document.createElement("div"));
+
+
+letters.forEach(letter=>{
+
+let label=document.createElement("div");
+
+label.className="label";
+label.textContent=letter;
+
+gameGrid.appendChild(label);
+
+});
+
+
+
+for(let row=0;row<10;row++){
+
+
+let number=document.createElement("div");
+
+number.className="label";
+number.textContent=row+1;
+
+gameGrid.appendChild(number);
+
+
+
+for(let column=0;column<10;column++){
+
+
+let square=document.createElement("div");
+
+square.className="square";
+
+
+let location=row*10+column;
+
+let coordinate=
+letters[column]+(row+1);
+
+
+
+square.onclick=function(){
+
+
+shots++;
+
+
+let ship=ships.find(s=>
+s.positions.includes(location)
+);
+
+
+
+if(ship){
+
+
+hits++;
+
+square.style.background="red";
+
+
+if(!ship.hits.includes(location)){
+ship.hits.push(location);
+}
+
+
+if(ship.hits.length===ship.positions.length){
+
+message.textContent=
+"💥 You sank the "+ship.name+"!";
+
+}
+
+else{
+
+message.textContent=
+"🚢 HIT at "+coordinate+"!";
+
+}
+
+
+}
+
+
+else{
+
+
+misses++;
+
+square.style.background="white";
+
+message.textContent=
+"💦 MISS at "+coordinate+"!";
+
+}
+
+
+
+square.style.pointerEvents="none";
+
+updateStatus();
+
+
+};
+
+
+gameGrid.appendChild(square);
+
+
+}
+
+}
+
 
 }
 
@@ -296,14 +314,18 @@ function updateStatus(){
 
 function newGame(){
 
- createShips();
+hits=0;
+misses=0;
+shots=0;
 
- message.textContent=
- "Find the ships!";
+createShips();
 
- updateStatus();
+message.textContent=
+"Find the ships!";
 
- drawBoard();
+drawBoard();
+
+updateStatus();
 
 }
 
