@@ -51,7 +51,17 @@ const board = document.getElementById("board");
 const message = document.getElementById("message");
 
 // Hidden ships
-const ships = [5, 8, 22, 41, 63, 77, 94];
+const ships = [];
+
+while (ships.length < 7) {
+
+  const random = Math.floor(Math.random() * 100);
+
+  if (!ships.includes(random)) {
+    ships.push(random);
+  }
+
+}
 
 for (let i = 0; i < 100; i++) {
 
