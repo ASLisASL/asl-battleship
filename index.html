@@ -1,329 +1,183 @@
-<!DOCTYPE html>
-<html lang="en">
+function placeSquare(location){
 
-<head>
-
-<meta charset="UTF-8">
-<title>ASL Battleship</title>
-
-<style>
-
-body{
-font-family:Arial,sans-serif;
-text-align:center;
-background:#e8f6ff;
+if(!selectedShip){
+return;
 }
 
-.screen{
-display:none;
+if(currentSquares.includes(location)){
+return;
 }
 
-.active{
-display:block;
-}
 
-button{
-padding:12px 20px;
-margin:10px;
-font-size:18px;
-cursor:pointer;
-border-radius:8px;
-}
+// First square
+if(currentSquares.length === 0){
 
-input{
-padding:12px;
-font-size:18px;
-text-align:center;
-text-transform:uppercase;
-}
+currentSquares.push(location);
 
-.roomCode{
+drawBoard();
+updateText();
 
-font-size:40px;
-font-weight:bold;
-letter-spacing:8px;
-margin:20px;
-
-}
-
-.card{
-
-background:white;
-border:2px solid #333;
-border-radius:12px;
-padding:20px;
-margin:20px auto;
-max-width:500px;
-
-}
-
-</style>
-
-</head>
-
-
-<body>
-
-
-<h1>🤟 ASL Battleship 🚢</h1>
-
-
-
-<!-- HOME -->
-
-<div id="home" class="screen active card">
-
-<h2>Welcome!</h2>
-
-<p>
-Create a game or join a friend's game.
-</p>
-
-
-<button onclick="createGame()">
-🚢 Create New Game
-</button>
-
-
-<br>
-
-
-<button onclick="showJoin()">
-🎯 Join Game
-</button>
-
-
-</div>
-
-
-
-<!-- JOIN -->
-
-<div id="join" class="screen card">
-
-<h2>Join Game</h2>
-
-
-<input id="joinCode" placeholder="ROOM CODE">
-
-
-<br>
-
-
-<button onclick="joinGame()">
-JOIN
-</button>
-
-
-<button onclick="goHome()">
-Back
-</button>
-
-
-</div>
-
-
-
-
-<!-- WAITING -->
-
-<div id="waiting" class="screen card">
-
-
-<h2>Waiting Room</h2>
-
-
-<p>
-Share this code with your opponent:
-</p>
-
-
-<div class="roomCode" id="roomDisplay">
-
-</div>
-
-
-<p id="waitingText">
-Waiting for player...
-</p>
-
-
-<button onclick="simulateJoin()">
-(Test: Join Player)
-</button>
-
-
-</div>
-
-
-
-
-
-<!-- RULES -->
-
-<div id="rules" class="screen card">
-
-
-<h2>🚢 How To Play</h2>
-
-
-<p>
-1. Place your ships
-</p>
-
-<p>
-2. Take turns attacking
-</p>
-
-<p>
-3. Sink all enemy ships to win!
-</p>
-
-
-<button onclick="startSetup()">
-START
-</button>
-
-
-</div>
-
-
-
-
-<script>
-
-
-let roomCode="";
-
-
-
-function showScreen(id){
-
-document.querySelectorAll(".screen")
-.forEach(screen=>{
-
-screen.classList.remove("active");
-
-});
-
-
-document.getElementById(id)
-.classList.add("active");
+return;
 
 }
 
 
+// Second square decides direction
+if(currentSquares.length === 1){
 
-function createGame(){
+let first=currentSquares[0];
 
+let row1=Math.floor(first/10);
+let col1=first%10;
 
-roomCode=
-Math.random()
-.toString(36)
-.substring(2,7)
-.toUpperCase();
-
-
-
-document.getElementById("roomDisplay")
-.textContent=roomCode;
+let row2=Math.floor(location/10);
+let col2=location%10;
 
 
-showScreen("waiting");
+if(row1===row2){
 
+direction="horizontal";
 
 }
+else if(col1===col2){
 
-
-
-
-function showJoin(){
-
-showScreen("join");
+direction="vertical";
 
 }
-
-
-
-
-function joinGame(){
-
-
-let code=
-document.getElementById("joinCode")
-.value
-.toUpperCase();
-
-
-
-if(code.length===5){
-
-
-roomCode=code;
-
-
-showScreen("rules");
-
-
-}
-
 else{
 
+document.getElementById("message").textContent =
+"❌ Ships must be straight!";
 
-alert("Please enter a 5 character room code");
-
-}
-
-
-}
-
-
-
-
-function simulateJoin(){
-
-
-document.getElementById("waitingText")
-.textContent=
-"🎉 Player joined!";
-
-
-setTimeout(()=>{
-
-showScreen("rules");
-
-},1000);
-
+return;
 
 }
 
 
+currentSquares.push(location);
 
 
-function startSetup(){
+if(currentSquares.length === selectedShip.size){
+
+finishShip();
+
+return;
+
+}
 
 
-alert(
-"Next step: Ship setup screen 🚢"
-);
+drawBoard();
+updateText();
 
+return;
 
 }
 
 
 
+// Third and later squares
 
-function goHome(){
+let last=currentSquares[currentSquares.length-1];
 
-showScreen("home");
+let lastRow=Math.floor(last/10);
+let lastCol=last%10;
+
+let newRow=Math.floor(location/10);
+let newCol=location%10;
+
+
+
+if(direction==="horizontal"){
+
+if(newRow!==lastRow || location!==last+1){
+
+document.getElementById("message").textContent =
+"❌ Continue straight!";
+
+return;
+
+}
 
 }
 
 
 
-</script>
+if(direction==="vertical"){
+
+if(newCol!==lastCol || location!==last+10){
+
+document.getElementById("message").textContent =
+"❌ Continue straight!";
+
+return;
+
+}
+
+}
 
 
-</body>
 
-</html>
+currentSquares.push(location);
+
+
+
+if(currentSquares.length === selectedShip.size){
+
+finishShip();
+
+return;
+
+}
+
+
+
+drawBoard();
+updateText();
+
+
+}
+
+
+
+function finishShip(){
+
+
+let completedShip={
+
+name:selectedShip.name,
+
+positions:[...currentSquares]
+
+};
+
+
+
+shipsPlaced.push(completedShip);
+
+
+
+removeButton(selectedShip.name);
+
+
+
+document.getElementById("message").textContent =
+"🚢 "+completedShip.name+" Complete!";
+
+
+
+selectedShip=null;
+
+currentSquares=[];
+
+direction=null;
+
+
+
+checkReady();
+
+
+
+drawBoard();
+
+
+}
