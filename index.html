@@ -21,26 +21,6 @@ background:#e8f6ff;
 }
 
 
-h1{
-
-margin-top:20px;
-
-}
-
-
-.container{
-
-display:flex;
-
-justify-content:center;
-
-gap:40px;
-
-flex-wrap:wrap;
-
-}
-
-
 
 .panel{
 
@@ -51,6 +31,10 @@ border:2px solid #333;
 border-radius:12px;
 
 padding:20px;
+
+margin:20px auto;
+
+max-width:800px;
 
 }
 
@@ -74,9 +58,43 @@ border-radius:8px;
 
 button:disabled{
 
-opacity:0.5;
+opacity:.5;
 
 cursor:not-allowed;
+
+}
+
+
+
+input{
+
+padding:10px;
+
+font-size:18px;
+
+text-align:center;
+
+}
+
+
+
+.hidden{
+
+display:none;
+
+}
+
+
+
+.container{
+
+display:flex;
+
+justify-content:center;
+
+gap:40px;
+
+flex-wrap:wrap;
 
 }
 
@@ -116,23 +134,21 @@ font-weight:bold;
 
 .square{
 
-width:35px;
+width:60px;
+height:45px;
+font-size:11px;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+word-break:break-word;
 
-height:35px;
 
 background:#9edcff;
 
 border:1px solid black;
 
 cursor:pointer;
-
-}
-
-
-
-.square:hover{
-
-transform:scale(1.05);
 
 }
 
@@ -158,19 +174,10 @@ background:#555;
 
 font-size:18px;
 
-margin:10px;
+margin:8px;
 
 }
 
-
-
-.complete{
-
-color:green;
-
-font-weight:bold;
-
-}
 
 
 </style>
@@ -182,9 +189,106 @@ font-weight:bold;
 <body>
 
 
-
 <h1>🤟 ASL Battleship 🚢</h1>
 
+
+
+<!-- HOME -->
+
+<div id="homeScreen" class="panel">
+
+
+<h2>Welcome!</h2>
+
+
+<p>
+Practice ASL vocabulary while playing Battleship.
+</p>
+
+
+<button onclick="createGame()">
+
+Create Game
+
+</button>
+
+
+<button onclick="showJoin()">
+
+Join Game
+
+</button>
+
+
+</div>
+
+
+
+
+
+<!-- JOIN -->
+
+<div id="joinScreen" class="panel hidden">
+
+
+<h2>Join Game</h2>
+
+
+<input id="joinCode" placeholder="Enter Room Code">
+
+
+<br>
+
+
+<button onclick="joinGame()">
+
+JOIN
+
+</button>
+
+
+</div>
+
+
+
+
+
+<!-- WAITING ROOM -->
+
+
+<div id="waitingScreen" class="panel hidden">
+
+
+<h2>Waiting Room</h2>
+
+
+<h3 id="roomDisplay"></h3>
+
+
+<p id="playerStatus">
+
+Waiting for player...
+
+</p>
+
+
+<button id="startButton" onclick="startGame()" style="display:none">
+
+START GAME
+
+</button>
+
+
+</div>
+
+
+
+
+
+<!-- GAME -->
+
+
+<div id="gameScreen" class="hidden">
 
 
 <div class="container">
@@ -194,7 +298,6 @@ font-weight:bold;
 
 
 <h2>🚢 Fleet Setup</h2>
-
 
 
 <h3 id="message">
@@ -207,57 +310,45 @@ Choose a ship
 <h3 id="progress"></h3>
 
 
-
 <div id="ships">
 
 
 <button onclick="selectShip('Carrier',5)">
-
 Carrier (5)
-
 </button>
 
 
 <button onclick="selectShip('Battleship',4)">
-
 Battleship (4)
-
 </button>
 
 
 <button onclick="selectShip('Cruiser',3)">
-
 Cruiser (3)
-
 </button>
 
 
 <button onclick="selectShip('Submarine',3)">
-
 Submarine (3)
-
 </button>
 
 
 <button onclick="selectShip('Destroyer',2)">
-
 Destroyer (2)
-
 </button>
 
 
 </div>
 
 
-
-<button onclick="undoSquare">
+<button onclick="undoSquare()">
 
 ↩ Undo
 
 </button>
 
 
-<button onclick="resetShip">
+<button onclick="resetShip()">
 
 🧹 Reset
 
@@ -275,7 +366,6 @@ Destroyer (2)
 
 
 </div>
-
 
 
 
@@ -332,10 +422,241 @@ Destroyer ⬜⬜
 </div>
 
 
-
 <div id="board"></div>
 
+
+</div>
+
+
 <script>
+
+
+// ==========================
+// LOBBY SYSTEM
+// ==========================
+
+
+let roomCode = "";
+
+let isHost = false;
+
+let playerJoined = false;
+
+
+
+function hideAllScreens(){
+
+
+document.getElementById("homeScreen")
+.classList.add("hidden");
+
+
+document.getElementById("joinScreen")
+.classList.add("hidden");
+
+
+document.getElementById("waitingScreen")
+.classList.add("hidden");
+
+
+document.getElementById("gameScreen")
+.classList.add("hidden");
+
+
+}
+
+
+
+
+
+
+function createGame(){
+
+
+isHost=true;
+
+
+roomCode = generateCode();
+
+
+
+hideAllScreens();
+
+
+
+document.getElementById("waitingScreen")
+.classList.remove("hidden");
+
+
+
+document.getElementById("roomDisplay").textContent =
+
+"Room Code: " + roomCode;
+
+
+
+document.getElementById("playerStatus").innerHTML =
+
+`
+Player 1 ✅
+<br>
+Player 2 ⏳ Waiting...
+`;
+
+
+
+}
+
+
+
+
+
+
+function showJoin(){
+
+
+hideAllScreens();
+
+
+
+document.getElementById("joinScreen")
+.classList.remove("hidden");
+
+
+}
+
+
+
+
+
+
+
+function joinGame(){
+
+
+let entered =
+
+document.getElementById("joinCode")
+.value
+.toUpperCase();
+
+
+
+
+
+if(entered !== roomCode){
+
+
+alert("Room not found");
+
+
+return;
+
+
+}
+
+
+
+playerJoined=true;
+
+
+
+hideAllScreens();
+
+
+
+document.getElementById("waitingScreen")
+.classList.remove("hidden");
+
+
+
+document.getElementById("roomDisplay").textContent =
+
+"Room Code: " + roomCode;
+
+
+
+document.getElementById("playerStatus").innerHTML =
+
+`
+Player 1 ✅
+<br>
+Player 2 ✅
+`;
+
+
+
+document.getElementById("startButton")
+.style.display="inline-block";
+
+
+
+}
+
+
+
+
+
+
+
+function generateCode(){
+
+
+let characters =
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+
+let result="";
+
+
+
+for(let i=0;i<5;i++){
+
+
+result += characters[
+
+Math.floor(Math.random()*characters.length)
+
+];
+
+
+}
+
+
+
+return result;
+
+
+}
+
+
+
+
+
+
+
+function startGame(){
+
+
+hideAllScreens();
+
+
+
+document.getElementById("gameScreen")
+.classList.remove("hidden");
+
+
+
+drawBoard();
+
+
+}
+
+
+
+// ==========================
+// BATTLESHIP SETUP
+// ==========================
 
 
 const letters=[
@@ -354,22 +675,99 @@ let shipsPlaced=[];
 
 let direction=null;
 
+// ==========================
+// ASL VOCABULARY SYSTEM
+// ==========================
 
 
-let fleetStatus={
+let vocabularyGrid=[];
 
-Carrier:false,
 
-Battleship:false,
 
-Cruiser:false,
+const vocabularyWords=[
 
-Submarine:false,
+"APPLE",
+"BANANA",
+"PIZZA",
+"MILK",
+"HAMBURGER",
+"COOKIE",
+"DOG",
+"CAT",
+"FISH",
+"BIRD",
+"HORSE",
+"TIGER",
+"BOOK",
+"PENCIL",
+"TEACHER",
+"STUDENT",
+"CHAIR",
+"TABLE",
+"RED",
+"BLUE",
+"GREEN",
+"YELLOW",
+"MOTHER",
+"FATHER",
+"SISTER",
+"BROTHER",
+"HOUSE",
+"CAR",
+"TREE",
+"WATER"
 
-Destroyer:false
+];
 
-};
 
+
+let numberWords=[];
+
+
+for(let i=0;i<=100;i++){
+
+numberWords.push(i.toString());
+
+}
+
+function generateVocabularyGrid(){
+
+
+let pool=[
+
+...vocabularyWords,
+
+...numberWords
+
+];
+
+
+// shuffle
+
+pool.sort(()=>Math.random()-0.5);
+
+
+
+vocabularyGrid=[];
+
+
+
+for(let i=0;i<100;i++){
+
+
+vocabularyGrid.push({
+
+location:i,
+
+value:pool[i]
+
+});
+
+
+}
+
+
+}
 
 
 
@@ -384,9 +782,13 @@ board.innerHTML="";
 
 
 
+// corner
+
 board.appendChild(document.createElement("div"));
 
 
+
+// letters
 
 letters.forEach(letter=>{
 
@@ -407,6 +809,8 @@ board.appendChild(label);
 
 
 
+
+
 for(let row=0;row<10;row++){
 
 
@@ -423,13 +827,16 @@ board.appendChild(number);
 
 
 
+
 for(let col=0;col<10;col++){
+
 
 
 let square=document.createElement("div");
 
 
 square.className="square";
+
 
 
 let location=row*10+col;
@@ -444,10 +851,24 @@ placeSquare(location);
 
 
 
-board.appendChild(square);
+if(vocabularyGrid[location]){
+
+
+square.textContent =
+vocabularyGrid[location].value;
 
 
 }
+
+
+
+
+board.appendChild(square);
+
+
+
+}
+
 
 
 }
@@ -466,6 +887,8 @@ showCurrent();
 
 
 
+
+
 function selectShip(name,size){
 
 
@@ -478,7 +901,9 @@ size:size
 };
 
 
+
 currentSquares=[];
+
 
 direction=null;
 
@@ -486,11 +911,8 @@ direction=null;
 
 document.getElementById("message").textContent=
 
-"Place "+name;
+"Place "+name+" 🚢";
 
-
-
-updateProgress();
 
 
 drawBoard();
@@ -503,29 +925,10 @@ drawBoard();
 
 
 
-function updateProgress(){
-
-if(selectedShip){
-
-document.getElementById("progress").textContent =
-"Place " + selectedShip.name + " 🚢";
-
-}
-
-else{
-
-document.getElementById("progress").textContent="";
-
-}
-
-}
-
-
-
-
 
 
 function placeSquare(location){
+
 
 
 if(!selectedShip){
@@ -533,6 +936,7 @@ if(!selectedShip){
 return;
 
 }
+
 
 
 
@@ -546,15 +950,12 @@ return;
 
 
 
-if(currentSquares.length===0){
+if(isOccupied(location)){
 
 
-currentSquares.push(location);
+document.getElementById("message").textContent=
 
-
-drawBoard();
-
-updateProgress();
+"❌ Ship already there!";
 
 
 return;
@@ -567,7 +968,36 @@ return;
 
 
 
+
+// first square
+
+
+if(currentSquares.length===0){
+
+
+currentSquares.push(location);
+
+
+drawBoard();
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+// second square decides direction
+
+
 if(currentSquares.length===1){
+
 
 
 let first=currentSquares[0];
@@ -578,9 +1008,11 @@ let row1=Math.floor(first/10);
 let col1=first%10;
 
 
+
 let row2=Math.floor(location/10);
 
 let col2=location%10;
+
 
 
 
@@ -605,7 +1037,7 @@ else{
 
 document.getElementById("message").textContent=
 
-"❌ Ships must be straight";
+"❌ Ships must be straight!";
 
 
 return;
@@ -615,7 +1047,11 @@ return;
 
 
 
+
+
 currentSquares.push(location);
+
+
 
 
 
@@ -634,8 +1070,6 @@ return;
 
 drawBoard();
 
-updateProgress();
-
 
 return;
 
@@ -647,12 +1081,19 @@ return;
 
 
 
+
+
+// continue ship
+
+
 let last=currentSquares[currentSquares.length-1];
+
 
 
 let lastRow=Math.floor(last/10);
 
 let lastCol=last%10;
+
 
 
 let newRow=Math.floor(location/10);
@@ -662,18 +1103,23 @@ let newCol=location%10;
 
 
 
+
+
 if(direction==="horizontal"){
 
 
 if(
+
 newRow!==lastRow ||
+
 Math.abs(newCol-lastCol)!==1
+
 ){
 
 
 document.getElementById("message").textContent=
 
-"❌ Ships must be connected!";
+"❌ Ships must connect!";
 
 
 return;
@@ -683,6 +1129,9 @@ return;
 
 
 }
+
+
+
 
 
 
@@ -690,36 +1139,17 @@ if(direction==="vertical"){
 
 
 if(
+
 newCol!==lastCol ||
+
 Math.abs(newRow-lastRow)!==1
+
 ){
 
 
 document.getElementById("message").textContent=
 
-"❌ Ships must be connected!";
-
-
-return;
-
-
-}
-
-
-}
-
-
-
-
-if(direction==="vertical"){
-
-
-if(newCol!==lastCol || location!==last+10){
-
-
-document.getElementById("message").textContent=
-
-"❌ Continue straight";
+"❌ Ships must connect!";
 
 
 return;
@@ -738,6 +1168,8 @@ currentSquares.push(location);
 
 
 
+
+
 if(currentSquares.length===selectedShip.size){
 
 
@@ -751,12 +1183,15 @@ return;
 
 
 
+
 drawBoard();
 
-updateProgress();
 
 
 }
+
+
+
 
 
 
@@ -777,17 +1212,20 @@ positions:[...currentSquares]
 
 
 
-fleetStatus[selectedShip.name]=true;
 
 
-
-document.getElementById(selectedShip.name).innerHTML=
+document.getElementById(selectedShip.name)
+.innerHTML=
 
 "✅ "+selectedShip.name;
 
 
 
+
+
 removeButton(selectedShip.name);
+
+
 
 
 
@@ -797,47 +1235,46 @@ document.getElementById("message").textContent=
 
 
 
+
+
 selectedShip=null;
 
+
 currentSquares=[];
+
 
 direction=null;
 
 
 
 drawBoard();
+
+
 
 checkReady();
 
 
-}
-
-
-
-
-
-
-function undoSquare(){
-
-
-if(currentSquares.length>0){
-
-
-currentSquares.pop();
-
-
-
-if(currentSquares.length<2){
-
-direction=null;
 
 }
 
 
 
-drawBoard();
 
-updateProgress();
+
+
+
+
+
+function isOccupied(location){
+
+
+for(let ship of shipsPlaced){
+
+
+if(ship.positions.includes(location)){
+
+
+return true;
 
 
 }
@@ -847,25 +1284,13 @@ updateProgress();
 
 
 
-
-
-
-function resetShip(){
-
-
-currentSquares=[];
-
-
-direction=null;
-
-
-
-drawBoard();
-
-updateProgress();
+return false;
 
 
 }
+
+
+
 
 
 
@@ -879,19 +1304,21 @@ let squares=document.querySelectorAll(".square");
 
 
 
+
 shipsPlaced.forEach(ship=>{
 
 
-ship.positions.forEach(pos=>{
+ship.positions.forEach(position=>{
 
 
-if(squares[pos]){
+if(squares[position]){
 
 
-squares[pos].classList.add("ship");
+squares[position].classList.add("ship");
 
 
 }
+
 
 
 });
@@ -901,6 +1328,9 @@ squares[pos].classList.add("ship");
 
 
 }
+
+
+
 
 
 
@@ -914,13 +1344,13 @@ let squares=document.querySelectorAll(".square");
 
 
 
-currentSquares.forEach(pos=>{
+currentSquares.forEach(position=>{
 
 
-if(squares[pos]){
+if(squares[position]){
 
 
-squares[pos].classList.add("preview");
+squares[position].classList.add("preview");
 
 
 }
@@ -930,6 +1360,9 @@ squares[pos].classList.add("preview");
 
 
 }
+
+
+
 
 
 
@@ -962,6 +1395,67 @@ button.remove();
 
 
 
+
+
+
+function undoSquare(){
+
+
+if(currentSquares.length>0){
+
+
+currentSquares.pop();
+
+
+
+if(currentSquares.length<2){
+
+
+direction=null;
+
+
+}
+
+
+
+drawBoard();
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+function resetShip(){
+
+
+currentSquares=[];
+
+
+direction=null;
+
+
+
+drawBoard();
+
+
+}
+
+
+
+
+
+
+
+
+
 function checkReady(){
 
 
@@ -975,13 +1469,15 @@ document.getElementById("readyButton")
 
 document.getElementById("message").textContent=
 
-"🚢 All ships ready!";
+"🚢 Fleet Complete!";
 
 
 }
 
 
 }
+
+
 
 
 
@@ -991,9 +1487,10 @@ document.getElementById("message").textContent=
 function readyUp(){
 
 
+
 document.getElementById("message").textContent=
 
-"✅ You are ready! Waiting for opponent...";
+"✅ Ready! Waiting for opponent...";
 
 
 
@@ -1014,7 +1511,12 @@ button.disabled=true;
 
 
 
+
+
+generateVocabularyGrid();
+
 drawBoard();
+
 
 
 </script>
@@ -1024,3 +1526,4 @@ drawBoard();
 
 
 </html>
+
