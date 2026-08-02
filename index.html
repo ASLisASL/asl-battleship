@@ -1,68 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<meta charset="UTF-8">
 <title>ASL Battleship</title>
 
 <style>
 
-body {
-  font-family: Arial, sans-serif;
-  text-align:center;
+body{
+font-family:Arial,sans-serif;
+text-align:center;
 }
 
-button {
-  padding:8px 12px;
-  margin:5px;
-  cursor:pointer;
+.boards{
+display:flex;
+justify-content:center;
+gap:40px;
+flex-wrap:wrap;
 }
 
-#message {
-  font-size:20px;
-  font-weight:bold;
-  margin:15px;
+.panel{
+border:2px solid black;
+padding:15px;
 }
 
-#status {
-  font-size:18px;
-  margin:10px;
+.shipStatus{
+margin:10px;
+font-size:18px;
 }
 
-.game-grid {
-  display:grid;
-  grid-template-columns:35px repeat(10,40px);
-  grid-template-rows:35px repeat(10,40px);
-  gap:4px;
-  justify-content:center;
+.dot{
+display:inline-block;
+width:18px;
+height:18px;
+border-radius:50%;
+background:gray;
+margin:2px;
 }
 
-.label {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-weight:bold;
+.dot.hit{
+background:red;
 }
 
-.square {
-  width:40px;
-  height:40px;
-  background:lightblue;
-  border:1px solid black;
-  cursor:pointer;
+.game-grid{
+display:grid;
+grid-template-columns:35px repeat(10,35px);
+grid-template-rows:35px repeat(10,35px);
+gap:3px;
+justify-content:center;
 }
 
-.preview {
-  background:#999;
+.label{
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
 }
 
-.ship {
-  background:gray;
+.square{
+width:35px;
+height:35px;
+background:lightblue;
+border:1px solid black;
+cursor:pointer;
 }
 
-.locked {
-  pointer-events:none;
+.ship{
+background:gray;
+}
+
+.hit{
+background:red;
+}
+
+.miss{
+background:white;
 }
 
 </style>
@@ -74,56 +86,42 @@ button {
 
 <h1>🤟 ASL Battleship</h1>
 
-
-<div id="message">
-Choose a ship
-</div>
-
-
-<div id="status">
-</div>
+<h2 id="message">
+Battle Start!
+</h2>
 
 
-<div id="ships">
+<div class="boards">
 
-<button onclick="selectShip('Carrier',5)">
-Carrier 🚢 5
-</button>
 
-<button onclick="selectShip('Battleship',4)">
-Battleship 🚢 4
-</button>
+<div class="panel">
 
-<button onclick="selectShip('Cruiser',3)">
-Cruiser 🚢 3
-</button>
+<h2>🚢 My Fleet</h2>
 
-<button onclick="selectShip('Submarine',3)">
-Submarine 🚢 3
-</button>
+<div id="myFleet"></div>
 
-<button onclick="selectShip('Destroyer',2)">
-Destroyer 🚢 2
-</button>
+<div id="myBoard" class="game-grid"></div>
 
 </div>
 
 
-<button id="readyButton" onclick="readyUp()" style="display:none;">
-✅ Ready
-</button>
+
+<div class="panel">
+
+<h2>🎯 Enemy Waters</h2>
+
+<div id="enemyFleet"></div>
+
+<div id="attackBoard" class="game-grid"></div>
+
+</div>
 
 
-<div id="gameGrid" class="game-grid"></div>
+</div>
 
 
 
 <script>
-
-const gameGrid=document.getElementById("gameGrid");
-const message=document.getElementById("message");
-const status=document.getElementById("status");
-const readyButton=document.getElementById("readyButton");
 
 
 const letters=[
@@ -132,47 +130,102 @@ const letters=[
 ];
 
 
-let selectedShip=null;
 
-let currentSquares=[];
+let myShips=[
 
-let shipsPlaced=[];
+{
+name:"Carrier",
+size:5,
+positions:[22,23,24,25,26],
+hits:[]
+},
 
-let ready=false;
+{
+name:"Battleship",
+size:4,
+positions:[51,52,53,54],
+hits:[]
+},
 
+{
+name:"Cruiser",
+size:3,
+positions:[70,71,72],
+hits:[]
+},
 
+{
+name:"Submarine",
+size:3,
+positions:[10,20,30],
+hits:[]
+},
 
-function selectShip(name,size){
-
-if(ready){
-return;
+{
+name:"Destroyer",
+size:2,
+positions:[80,81],
+hits:[]
 }
 
-
-selectedShip={
-name:name,
-size:size
-};
+];
 
 
-currentSquares=[];
 
+let enemyShips=[
 
-message.textContent=
-"Place "+name+" - choose "+size+" connected squares";
+{
+name:"Carrier",
+size:5,
+positions:[15,16,17,18,19],
+hits:[]
+},
 
+{
+name:"Battleship",
+size:4,
+positions:[40,41,42,43],
+hits:[]
+},
 
+{
+name:"Cruiser",
+size:3,
+positions:[60,61,62],
+hits:[]
+},
+
+{
+name:"Submarine",
+size:3,
+positions:[5,15,25],
+hits:[]
+},
+
+{
+name:"Destroyer",
+size:2,
+positions:[90,91],
+hits:[]
 }
 
+];
+
+
+let attacked=[];
+
+let sunkEnemyShips=[];
 
 
 
-function drawBoard(){
+function createBoard(id,clickFunction){
 
-gameGrid.innerHTML="";
+let board=document.getElementById(id);
+
+board.innerHTML="";
 
 
-gameGrid.appendChild(document.createElement("div"));
+board.appendChild(document.createElement("div"));
 
 
 
@@ -183,7 +236,7 @@ let label=document.createElement("div");
 label.className="label";
 label.textContent=letter;
 
-gameGrid.appendChild(label);
+board.appendChild(label);
 
 });
 
@@ -197,7 +250,7 @@ let number=document.createElement("div");
 number.className="label";
 number.textContent=row+1;
 
-gameGrid.appendChild(number);
+board.appendChild(number);
 
 
 
@@ -212,220 +265,114 @@ square.className="square";
 let location=row*10+col;
 
 
-
 square.onclick=function(){
 
-
-if(!selectedShip || ready){
-return;
-}
-
-
-
-if(currentSquares.includes(location)){
-return;
-}
-
-
-
-if(currentSquares.length>0){
-
-
-let connected=currentSquares.some(old=>{
-
-
-let oldRow=Math.floor(old/10);
-let oldCol=old%10;
-
-
-let newRow=Math.floor(location/10);
-let newCol=location%10;
-
-
-return Math.abs(oldRow-newRow)+
-Math.abs(oldCol-newCol)===1;
-
-
-});
-
-
-
-if(!connected){
-
-message.textContent=
-"❌ Must connect to your ship";
-
-return;
-
-}
-
-
-}
-
-
-
-currentSquares.push(location);
-
-
-drawBoard();
-
-
-
-if(currentSquares.length===selectedShip.size){
-
-
-shipsPlaced.push({
-
-name:selectedShip.name,
-
-positions:[...currentSquares]
-
-});
-
-
-removeShipButton(selectedShip.name);
-
-
-message.textContent=
-selectedShip.name+" complete!";
-
-
-selectedShip=null;
-
-currentSquares=[];
-
-
-checkReady();
-
-
-drawBoard();
-
-}
-
-
+clickFunction(location,square);
 
 };
 
 
-
-gameGrid.appendChild(square);
-
+board.appendChild(square);
 
 }
 
 }
 
-showShips();
+}
 
 
-showPreview();
 
+
+function coordinate(location){
+
+let row=Math.floor(location/10);
+
+let col=location%10;
+
+
+return letters[col]+(row+1);
 
 }
 
 
 
-function showShips(){
 
-let squares=document.querySelectorAll(".square");
+function dots(amount){
 
-
-shipsPlaced.forEach(ship=>{
+let result="";
 
 
-ship.positions.forEach(pos=>{
+for(let i=0;i<amount;i++){
 
-
-if(squares[pos]){
-
-squares[pos].classList.add("ship");
+result+="<span class='dot hit'></span>";
 
 }
+
+
+return result;
+
+}
+
+
+
+
+function updatePanels(){
+
+
+let my=document.getElementById("myFleet");
+
+let enemy=document.getElementById("enemyFleet");
+
+
+my.innerHTML="";
+enemy.innerHTML="";
+
+
+
+myShips.forEach(ship=>{
+
+
+my.innerHTML+=
+
+"<div class='shipStatus'>"+
+ship.name+"<br>"+
+dots(ship.hits.length)+
+" "+
+(ship.size-ship.hits.length)+
+" left"+
+(ship.hits.length===ship.size?
+" 💥 SUNK":"")+
+"</div>";
+
+});
+
+
+
+
+
+sunkEnemyShips.forEach(ship=>{
+
+
+enemy.innerHTML+=
+
+"<div class='shipStatus'>"+
+"💥 "+ship.name+" SUNK"+
+"</div>";
 
 
 });
 
 
-});
+
+let damage=0;
 
 
-}
+enemyShips.forEach(ship=>{
 
+if(ship.hits.length>0 &&
+ship.hits.length<ship.size){
 
-
-
-function showPreview(){
-
-let squares=document.querySelectorAll(".square");
-
-
-currentSquares.forEach(pos=>{
-
-
-if(squares[pos]){
-
-squares[pos].classList.add("preview");
-
-}
-
-
-});
-
-
-}
-
-
-
-
-function removeShipButton(name){
-
-document.querySelectorAll("#ships button")
-.forEach(button=>{
-
-
-if(button.textContent.includes(name)){
-
-button.remove();
-
-}
-
-
-});
-
-
-}
-
-
-
-
-function checkReady(){
-
-if(shipsPlaced.length===5){
-
-readyButton.style.display="inline-block";
-
-
-message.textContent=
-"All ships placed! Ready?";
-
-}
-
-}
-
-
-
-
-function readyUp(){
-
-ready=true;
-
-
-document.querySelectorAll("button")
-.forEach(button=>{
-
-if(button!==readyButton){
-
-button.style.display="none";
+damage+=ship.hits.length;
 
 }
 
@@ -433,28 +380,165 @@ button.style.display="none";
 
 
 
-readyButton.style.display="none";
+if(damage>0){
 
 
-message.textContent=
-"✅ Player Ready!";
+enemy.innerHTML+=
 
-
-status.textContent=
-"⏳ Waiting for opponent...";
-
-
-drawBoard();
+"<div class='shipStatus'>"+
+"Detected Damage<br>"+
+dots(damage)+
+"</div>";
 
 
 }
 
 
 
-drawBoard();
+if(
+sunkEnemyShips.length===0 &&
+damage===0
+){
+
+enemy.innerHTML=
+"No information yet";
+
+}
+
+
+
+}
+
+
+
+
+
+function attack(location,square){
+
+
+if(attacked.includes(location)){
+return;
+}
+
+
+attacked.push(location);
+
+
+
+let ship=
+enemyShips.find(s=>
+s.positions.includes(location)
+);
+
+
+
+let spot=coordinate(location);
+
+
+
+if(ship){
+
+
+ship.hits.push(location);
+
+
+square.classList.add("hit");
+
+
+document.getElementById("message").textContent=
+"🎯 Attack "+spot+" — HIT!";
+
+
+
+if(ship.hits.length===ship.size){
+
+
+sunkEnemyShips.push(ship);
+
+
+document.getElementById("message").textContent=
+"💥 "+ship.name+" SUNK!";
+
+
+}
+
+
+}
+
+else{
+
+
+square.classList.add("miss");
+
+
+document.getElementById("message").textContent=
+"🎯 Attack "+spot+" — MISS!";
+
+
+}
+
+
+updatePanels();
+
+
+}
+
+
+
+
+function enemyAttack(location){
+
+
+let square=
+document.querySelectorAll("#myBoard .square")[location];
+
+
+let ship=
+myShips.find(s=>
+s.positions.includes(location)
+);
+
+
+
+if(ship){
+
+ship.hits.push(location);
+
+square.classList.add("hit");
+
+}
+
+else{
+
+square.classList.add("miss");
+
+}
+
+
+updatePanels();
+
+
+}
+
+
+
+createBoard(
+"myBoard",
+enemyAttack
+);
+
+
+createBoard(
+"attackBoard",
+attack
+);
+
+
+updatePanels();
 
 
 </script>
+
 
 </body>
 </html>
