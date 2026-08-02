@@ -10,13 +10,12 @@
 
 body {
   font-family: Arial, sans-serif;
-  text-align: center;
+  text-align:center;
 }
 
 button {
-  font-size:18px;
-  padding:8px 16px;
-  margin:10px;
+  padding:8px 12px;
+  margin:5px;
   cursor:pointer;
 }
 
@@ -28,7 +27,7 @@ button {
 
 #status {
   font-size:18px;
-  margin-bottom:15px;
+  margin:10px;
 }
 
 .game-grid {
@@ -54,23 +53,69 @@ button {
   cursor:pointer;
 }
 
+.preview {
+  background:#999;
+}
+
+.ship {
+  background:gray;
+}
+
+.locked {
+  pointer-events:none;
+}
+
 </style>
 
 </head>
+
 
 <body>
 
 <h1>🤟 ASL Battleship</h1>
 
-<button onclick="newGame()">🔄 New Game</button>
 
 <div id="message">
-Find the ships!
+Choose a ship
 </div>
 
-<div id="status"></div>
 
-<div class="game-grid" id="gameGrid"></div>
+<div id="status">
+</div>
+
+
+<div id="ships">
+
+<button onclick="selectShip('Carrier',5)">
+Carrier 🚢 5
+</button>
+
+<button onclick="selectShip('Battleship',4)">
+Battleship 🚢 4
+</button>
+
+<button onclick="selectShip('Cruiser',3)">
+Cruiser 🚢 3
+</button>
+
+<button onclick="selectShip('Submarine',3)">
+Submarine 🚢 3
+</button>
+
+<button onclick="selectShip('Destroyer',2)">
+Destroyer 🚢 2
+</button>
+
+</div>
+
+
+<button id="readyButton" onclick="readyUp()" style="display:none;">
+✅ Ready
+</button>
+
+
+<div id="gameGrid" class="game-grid"></div>
+
 
 
 <script>
@@ -78,6 +123,8 @@ Find the ships!
 const gameGrid=document.getElementById("gameGrid");
 const message=document.getElementById("message");
 const status=document.getElementById("status");
+const readyButton=document.getElementById("readyButton");
+
 
 const letters=[
 "A","B","C","D","E",
@@ -85,105 +132,38 @@ const letters=[
 ];
 
 
-const shipTypes=[
-{name:"Carrier",size:5},
-{name:"Battleship",size:4},
-{name:"Cruiser",size:3},
-{name:"Submarine",size:3},
-{name:"Destroyer",size:2}
-];
+let selectedShip=null;
+
+let currentSquares=[];
+
+let shipsPlaced=[];
+
+let ready=false;
 
 
-let ships=[];
-let hits=0;
-let misses=0;
-let shots=0;
 
+function selectShip(name,size){
 
-function createShips(){
-
-ships=[];
-
-shipTypes.forEach(type=>{
-
-while(true){
-
-let start=Math.floor(Math.random()*100);
-let vertical=Math.random()<0.5;
-
-let positions=[];
-
-
-for(let i=0;i<type.size;i++){
-
-positions.push(
-vertical ? start+(i*10) : start+i
-);
-
+if(ready){
+return;
 }
 
 
-let valid=positions.every(pos=>{
-
-let row=Math.floor(pos/10);
-let col=pos%10;
-
-return pos<100 &&
-row<10 &&
-col<10;
-
-});
+selectedShip={
+name:name,
+size:size
+};
 
 
-let overlap=positions.some(pos=>
-ships.some(ship=>
-ship.positions.includes(pos)
-)
-);
+currentSquares=[];
 
-
-if(valid && !overlap){
-
-ships.push({
-name:type.name,
-positions:positions,
-hits:[]
-});
-
-break;
-
-}
-
-}
-
-});
-
-}
-
-
-
-function updateStatus(){
-
-let left=ships.filter(ship=>
-ship.hits.length<ship.positions.length
-);
-
-
-status.textContent=
-"🚢 Ships left: "+left.length+
-" | 🎯 Hits: "+hits+
-" | 💦 Misses: "+misses+
-" | Shots: "+shots;
-
-
-if(left.length===0){
 
 message.textContent=
-"🎉 YOU WIN!";
+"Place "+name+" - choose "+size+" connected squares";
+
 
 }
 
-}
 
 
 
@@ -193,6 +173,7 @@ gameGrid.innerHTML="";
 
 
 gameGrid.appendChild(document.createElement("div"));
+
 
 
 letters.forEach(letter=>{
@@ -220,7 +201,7 @@ gameGrid.appendChild(number);
 
 
 
-for(let column=0;column<10;column++){
+for(let col=0;col<10;col++){
 
 
 let square=document.createElement("div");
@@ -228,76 +209,103 @@ let square=document.createElement("div");
 square.className="square";
 
 
-let location=row*10+column;
-
-let coordinate=
-letters[column]+(row+1);
+let location=row*10+col;
 
 
 
 square.onclick=function(){
 
 
-shots++;
-
-
-let ship=ships.find(s=>
-s.positions.includes(location)
-);
-
-
-
-if(ship){
-
-
-hits++;
-
-square.style.background="red";
-
-
-if(!ship.hits.includes(location)){
-ship.hits.push(location);
+if(!selectedShip || ready){
+return;
 }
 
 
-if(ship.hits.length===ship.positions.length){
+
+if(currentSquares.includes(location)){
+return;
+}
+
+
+
+if(currentSquares.length>0){
+
+
+let connected=currentSquares.some(old=>{
+
+
+let oldRow=Math.floor(old/10);
+let oldCol=old%10;
+
+
+let newRow=Math.floor(location/10);
+let newCol=location%10;
+
+
+return Math.abs(oldRow-newRow)+
+Math.abs(oldCol-newCol)===1;
+
+
+});
+
+
+
+if(!connected){
 
 message.textContent=
-"💥 You sank the "+ship.name+"!";
+"❌ Must connect to your ship";
+
+return;
 
 }
 
-else{
+
+}
+
+
+
+currentSquares.push(location);
+
+
+drawBoard();
+
+
+
+if(currentSquares.length===selectedShip.size){
+
+
+shipsPlaced.push({
+
+name:selectedShip.name,
+
+positions:[...currentSquares]
+
+});
+
+
+removeShipButton(selectedShip.name);
+
 
 message.textContent=
-"🚢 HIT at "+coordinate+"!";
+selectedShip.name+" complete!";
+
+
+selectedShip=null;
+
+currentSquares=[];
+
+
+checkReady();
+
+
+drawBoard();
 
 }
 
-
-}
-
-
-else{
-
-
-misses++;
-
-square.style.background="white";
-
-message.textContent=
-"💦 MISS at "+coordinate+"!";
-
-}
-
-
-
-square.style.pointerEvents="none";
-
-updateStatus();
 
 
 };
+
 
 
 gameGrid.appendChild(square);
@@ -307,31 +315,143 @@ gameGrid.appendChild(square);
 
 }
 
+showShips();
+
+
+showPreview();
+
 
 }
 
 
 
-function newGame(){
+function showShips(){
 
-hits=0;
-misses=0;
-shots=0;
+let squares=document.querySelectorAll(".square");
 
-createShips();
+
+shipsPlaced.forEach(ship=>{
+
+
+ship.positions.forEach(pos=>{
+
+
+if(squares[pos]){
+
+squares[pos].classList.add("ship");
+
+}
+
+
+});
+
+
+});
+
+
+}
+
+
+
+
+function showPreview(){
+
+let squares=document.querySelectorAll(".square");
+
+
+currentSquares.forEach(pos=>{
+
+
+if(squares[pos]){
+
+squares[pos].classList.add("preview");
+
+}
+
+
+});
+
+
+}
+
+
+
+
+function removeShipButton(name){
+
+document.querySelectorAll("#ships button")
+.forEach(button=>{
+
+
+if(button.textContent.includes(name)){
+
+button.remove();
+
+}
+
+
+});
+
+
+}
+
+
+
+
+function checkReady(){
+
+if(shipsPlaced.length===5){
+
+readyButton.style.display="inline-block";
+
 
 message.textContent=
-"Find the ships!";
+"All ships placed! Ready?";
+
+}
+
+}
+
+
+
+
+function readyUp(){
+
+ready=true;
+
+
+document.querySelectorAll("button")
+.forEach(button=>{
+
+if(button!==readyButton){
+
+button.style.display="none";
+
+}
+
+});
+
+
+
+readyButton.style.display="none";
+
+
+message.textContent=
+"✅ Player Ready!";
+
+
+status.textContent=
+"⏳ Waiting for opponent...";
+
 
 drawBoard();
 
-updateStatus();
 
 }
 
 
 
-newGame();
+drawBoard();
 
 
 </script>
