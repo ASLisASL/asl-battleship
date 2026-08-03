@@ -26,7 +26,7 @@ border:2px solid #333;
 border-radius:12px;
 padding:20px;
 margin:20px auto;
-max-width:900px;
+max-width:850px;
 
 }
 
@@ -38,14 +38,6 @@ margin:5px;
 font-size:16px;
 cursor:pointer;
 border-radius:8px;
-
-}
-
-
-button:disabled{
-
-opacity:.5;
-cursor:not-allowed;
 
 }
 
@@ -66,110 +58,34 @@ display:none;
 }
 
 
-.container{
-
-display:flex;
-justify-content:center;
-gap:40px;
-flex-wrap:wrap;
-
-}
-
-
-
-/* BOARDS */
-
 .board{
 
 display:grid;
-
 grid-template-columns:40px repeat(10,60px);
-
 grid-template-rows:40px repeat(10,45px);
-
 gap:3px;
-
 justify-content:center;
 
-margin-top:20px;
-
 }
-
-
-
-.label{
-
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:bold;
-
-}
-
 
 
 .square{
 
 width:60px;
 height:45px;
-
-font-size:11px;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-text-align:center;
-
-word-break:break-word;
-
 background:#9edcff;
-
 border:1px solid black;
 
-cursor:pointer;
-
 }
 
 
 
-.preview{
+.container{
 
-background:#999;
-
-}
-
-
-
-.ship{
-
-background:#555;
-color:white;
-
-}
-
-
-
-.hit{
-
-background:red;
-
-}
-
-
-
-.miss{
-
-background:white;
-
-}
-
-
-
-.fleet-item{
-
-font-size:18px;
-margin:8px;
+display:flex;
+justify-content:center;
+gap:40px;
+flex-wrap:wrap;
 
 }
 
@@ -186,7 +102,7 @@ margin:8px;
 
 
 
-<!-- HOME SCREEN -->
+<!-- HOME -->
 
 <div id="homeScreen" class="panel">
 
@@ -219,8 +135,7 @@ Join Game
 
 
 
-<!-- JOIN SCREEN -->
-
+<!-- JOIN -->
 
 <div id="joinScreen" class="panel hidden">
 
@@ -247,8 +162,7 @@ JOIN
 
 
 
-<!-- WAITING ROOM -->
-
+<!-- WAITING -->
 
 <div id="waitingScreen" class="panel hidden">
 
@@ -266,7 +180,7 @@ Waiting...
 </p>
 
 
-<button id="startButton" onclick="startGame()" style="display:none">
+<button id="startButton" style="display:none">
 
 START GAME
 
@@ -279,13 +193,9 @@ START GAME
 
 
 
-<!-- FLEET SETUP -->
-
+<!-- GAME -->
 
 <div id="gameScreen" class="hidden">
-
-
-<div class="container">
 
 
 <div class="panel">
@@ -301,107 +211,7 @@ Choose a ship
 </h3>
 
 
-
-<div id="ships">
-
-
-<button onclick="selectShip('Carrier',5)">
-Carrier (5)
-</button>
-
-
-<button onclick="selectShip('Battleship',4)">
-Battleship (4)
-</button>
-
-
-<button onclick="selectShip('Cruiser',3)">
-Cruiser (3)
-</button>
-
-
-<button onclick="selectShip('Submarine',3)">
-Submarine (3)
-</button>
-
-
-<button onclick="selectShip('Destroyer',2)">
-Destroyer (2)
-</button>
-
-
-</div>
-
-
-
-<button onclick="undoSquare()">
-
-↩ Undo
-
-</button>
-
-
-<button onclick="resetShip()">
-
-🧹 Reset
-
-</button>
-
-
-<br>
-
-
-<button id="readyButton" onclick="readyUp()" style="display:none">
-
-✅ READY
-
-</button>
-
-
-</div>
-
-
-
-
-
-<div class="panel">
-
-
-<h2>🚢 Your Fleet</h2>
-
-
-<div id="fleetStatus">
-
-
-<div class="fleet-item" id="Carrier">
-Carrier ⬜⬜⬜⬜⬜
-</div>
-
-
-<div class="fleet-item" id="Battleship">
-Battleship ⬜⬜⬜⬜
-</div>
-
-
-<div class="fleet-item" id="Cruiser">
-Cruiser ⬜⬜⬜
-</div>
-
-
-<div class="fleet-item" id="Submarine">
-Submarine ⬜⬜⬜
-</div>
-
-
-<div class="fleet-item" id="Destroyer">
-Destroyer ⬜⬜
-</div>
-
-
-</div>
-
-
-</div>
+<div id="ships"></div>
 
 
 </div>
@@ -417,8 +227,7 @@ Destroyer ⬜⬜
 
 
 
-<!-- BATTLE SCREEN -->
-
+<!-- BATTLE -->
 
 <div id="battleScreen" class="hidden">
 
@@ -431,43 +240,11 @@ Destroyer ⬜⬜
 
 <h3 id="turnMessage">
 
-Your Turn!
+Your Turn
 
 </h3>
 
 
-
-<div class="container">
-
-
-
-<div class="panel">
-
-
-<h3>Your Board</h3>
-
-
-<div id="yourBoard" class="board"></div>
-
-
-</div>
-
-
-
-
-<div class="panel">
-
-
-<h3>Attack Board</h3>
-
-
-<div id="attackBoard" class="board"></div>
-
-
-</div>
-
-
-
 </div>
 
 
@@ -477,496 +254,254 @@ Your Turn!
 
 
 
-<div id="challengeBox" class="panel hidden">
+
+<!-- IMPORTANT -->
+<!-- ALL JAVASCRIPT GOES INSIDE THIS ONE SCRIPT -->
 
 
-<h2 id="challengeWord">
-
-</h2>
-
-
-
-<button onclick="recordHit()">
-
-🎯 HIT
-
-</button>
-
-
-
-<button onclick="recordMiss()">
-
-💦 MISS
-
-</button>
-
-
-
-</div>
-
-
-</div>
-
-<script>
+<script type="module">
 
 
 // ==========================
-// LOBBY SYSTEM
+// FIREBASE CONNECTION
 // ==========================
 
 
-let roomCode="";
+// Firebase imports
 
-let isHost=false;
+import { initializeApp } 
+from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
 
-let playerJoined=false;
 
+import { getDatabase, ref, set, get, child, update } 
+from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
 
 
-function hideAllScreens(){
 
 
-document.getElementById("homeScreen")
-.classList.add("hidden");
+// YOUR FIREBASE CONFIG
 
+const firebaseConfig = {
+  apiKey: "AIzaSyD-96f3sXz9pT6AdR6R4yDkMIdXxtGw0l4",
+  authDomain: "asl-battleship.firebaseapp.com",
+  projectId: "asl-battleship",
+  storageBucket: "asl-battleship.firebasestorage.app",
+  messagingSenderId: "885145188874",
+  appId: "1:885145188874:web:1d64fe001a4b9822bc7df3"
+};
 
-document.getElementById("joinScreen")
-.classList.add("hidden");
 
 
-document.getElementById("waitingScreen")
-.classList.add("hidden");
 
+// START FIREBASE
 
-document.getElementById("gameScreen")
-.classList.add("hidden");
+const app = initializeApp(firebaseConfig);
 
 
-document.getElementById("battleScreen")
-.classList.add("hidden");
+const database = getDatabase(app);
 
 
-}
 
+console.log("Firebase connected!");
 
+// ==========================
+// PART 3 - CREATE GAME ROOM
+// ==========================
 
 
+let roomCode = "";
 
 
 
-function createGame(){
-
-
-isHost=true;
-
-
-roomCode=generateCode();
-
-
-
-hideAllScreens();
-
-
-
-document.getElementById("waitingScreen")
-.classList.remove("hidden");
-
-
-
-document.getElementById("roomDisplay").textContent=
-
-"Room Code: "+roomCode;
-
-
-
-document.getElementById("playerStatus").innerHTML=
-
-`
-Player 1 ✅
-<br>
-Player 2 ⏳ Waiting...
-`;
-
-
-
-}
-
-
-
-
-
-
-
-function showJoin(){
-
-
-hideAllScreens();
-
-
-
-document.getElementById("joinScreen")
-.classList.remove("hidden");
-
-
-}
-
-
-
-
-
-
-
-function joinGame(){
-
-
-let entered=
-
-document.getElementById("joinCode")
-.value
-.toUpperCase();
-
-
-
-
-if(entered!==roomCode){
-
-
-alert("Room not found");
-
-
-return;
-
-
-}
-
-
-
-playerJoined=true;
-
-
-
-hideAllScreens();
-
-
-
-document.getElementById("waitingScreen")
-.classList.remove("hidden");
-
-
-
-document.getElementById("roomDisplay").textContent=
-
-"Room Code: "+roomCode;
-
-
-
-document.getElementById("playerStatus").innerHTML=
-
-`
-Player 1 ✅
-<br>
-Player 2 ✅
-`;
-
-
-
-document.getElementById("startButton")
-.style.display="inline-block";
-
-
-}
-
-
-
-
-
-
-
+// Generate random room code
 
 function generateCode(){
 
 
-let characters=
-"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    let result = "";
 
 
-let result="";
+    for(let i = 0; i < 5; i++){
+
+        result += characters[
+            Math.floor(Math.random() * characters.length)
+        ];
+
+    }
 
 
-
-for(let i=0;i<5;i++){
-
-
-result+=characters[
-Math.floor(Math.random()*characters.length)
-];
-
-
-}
-
-
-return result;
-
+    return result;
 
 }
 
 
 
 
+// Create Game Button
+
+window.createGame = async function(){
+
+  console.log("CREATE BUTTON WORKS");
+
+    roomCode = generateCode();
 
 
 
-function startGame(){
+    await set(
 
+        ref(database, "rooms/" + roomCode),
 
-hideAllScreens();
+        {
 
+            player1: true,
 
+            player2: false,
 
-document.getElementById("gameScreen")
-.classList.remove("hidden");
+            status: "waiting"
 
+        }
 
-
-generateVocabularyGrid();
-
-
-drawBoard();
-
-
-}
-
+    );
+    
+   
 
 
 
 
+    document.getElementById("homeScreen")
+    .classList.add("hidden");
 
+
+
+    document.getElementById("waitingScreen")
+    .classList.remove("hidden");
+
+
+
+    document.getElementById("roomDisplay")
+    .textContent =
+
+    "Room Code: " + roomCode;
+
+
+
+    document.getElementById("playerStatus")
+    .innerHTML =
+
+    `
+    Player 1 ✅
+    <br>
+    Waiting for Player 2...
+    `;
+
+
+
+};
 
 
 // ==========================
-// ASL VOCABULARY SYSTEM
+// SHOW JOIN SCREEN
+// ==========================
+
+window.showJoin = function(){
+
+    document.getElementById("homeScreen")
+    .classList.add("hidden");
+
+
+    document.getElementById("joinScreen")
+    .classList.remove("hidden");
+
+};
+
+// ==========================
+// PART 4 - JOIN GAME
 // ==========================
 
 
-let vocabularyGrid=[];
+window.joinGame = async function(){
 
 
+    let enteredCode = document.getElementById("joinCode")
+    .value
+    .toUpperCase();
 
-const vocabularyWords=[
 
 
-"APPLE",
-"BANANA",
-"PIZZA",
-"MILK",
-"HAMBURGER",
-"COOKIE",
+    if(enteredCode === ""){
 
+        alert("Enter a room code!");
 
-"DOG",
-"CAT",
-"FISH",
-"BIRD",
-"HORSE",
-"TIGER",
+        return;
 
+    }
 
-"BOOK",
-"PENCIL",
-"TEACHER",
-"STUDENT",
-"CHAIR",
-"TABLE",
 
 
-"RED",
-"BLUE",
-"GREEN",
-"YELLOW",
+    const roomRef = ref(database, "rooms/" + enteredCode);
 
 
-"MOTHER",
-"FATHER",
-"SISTER",
-"BROTHER",
 
+    const snapshot = await get(roomRef);
 
-"HOUSE",
-"CAR",
-"TREE",
-"WATER"
 
 
-];
+    if(snapshot.exists()){
 
 
+        await update(roomRef, {
 
+            player2: true,
 
+            status: "ready"
 
-let numberWords=[];
+        });
 
 
 
-for(let i=0;i<=100;i++){
+        document.getElementById("homeScreen")
+        .classList.add("hidden");
 
 
-numberWords.push(i.toString());
 
+        document.getElementById("joinScreen")
+        .classList.add("hidden");
 
-}
 
 
+        document.getElementById("waitingScreen")
+        .classList.remove("hidden");
 
 
 
+        document.getElementById("roomDisplay")
+        .textContent =
 
+        "Room Code: " + enteredCode;
 
-function generateVocabularyGrid(){
 
 
-let pool=[
+        document.getElementById("playerStatus")
+        .innerHTML =
 
-...vocabularyWords,
+        `
+        Player 1 ✅
+        <br>
+        Player 2 ✅
+        `;
 
-...numberWords
 
-];
 
+    }
 
+    else{
 
-// shuffle
 
-pool.sort(()=>Math.random()-0.5);
+        alert("Room not found!");
 
-
-
-vocabularyGrid=[];
-
-
-
-for(let i=0;i<100;i++){
-
-
-vocabularyGrid.push({
-
-location:i,
-
-value:pool[i]
-
-});
-
-
-}
-
-
-}
-
-// ==========================
-// BATTLESHIP SYSTEM
-// ==========================
-
-
-const letters=[
-
-"A","B","C","D","E",
-"F","G","H","I","J"
-
-];
-
-
-
-let selectedShip=null;
-
-let currentSquares=[];
-
-let shipsPlaced=[];
-
-let direction=null;
-
-
-
-
-
-
-// ==========================
-// DRAW YOUR BOARD
-// ==========================
-
-
-function drawBoard(){
-
-
-let board=document.getElementById("board");
-
-
-board.innerHTML="";
-
-
-
-// corner
-
-board.appendChild(document.createElement("div"));
-
-
-
-// letters
-
-letters.forEach(letter=>{
-
-
-let label=document.createElement("div");
-
-
-label.className="label";
-
-
-label.textContent=letter;
-
-
-board.appendChild(label);
-
-
-});
-
-
-
-
-
-for(let row=0;row<10;row++){
-
-
-let number=document.createElement("div");
-
-
-number.className="label";
-
-
-number.textContent=row+1;
-
-
-board.appendChild(number);
-
-
-
-
-for(let col=0;col<10;col++){
-
-
-let square=document.createElement("div");
-
-
-square.className="square";
-
-
-
-let location=row*10+col;
-
-
-
-square.onclick=function(){
-
-
-placeSquare(location);
+    }
 
 
 };
@@ -974,1160 +509,10 @@ placeSquare(location);
 
 
 
-if(vocabularyGrid[location]){
 
-
-square.textContent=
-vocabularyGrid[location].value;
-
-
-}
-
-
-
-
-board.appendChild(square);
-
-
-
-}
-
-
-}
-
-
-
-showShips();
-
-showCurrent();
-
-
-}
-
-
-
-
-
-
-
-
-// ==========================
-// SELECT SHIP
-// ==========================
-
-
-function selectShip(name,size){
-
-
-selectedShip={
-
-name:name,
-
-size:size
-
-};
-
-
-
-currentSquares=[];
-
-direction=null;
-
-
-
-document.getElementById("message").textContent=
-
-"Place "+name+" 🚢";
-
-
-
-drawBoard();
-
-
-}
-
-
-
-
-
-
-
-
-// ==========================
-// PLACE SHIP
-// ==========================
-
-
-function placeSquare(location){
-
-
-
-if(!selectedShip){
-
-return;
-
-}
-
-
-
-
-if(currentSquares.includes(location)){
-
-return;
-
-}
-
-
-
-
-if(isOccupied(location)){
-
-
-document.getElementById("message").textContent=
-
-"❌ Ship already here!";
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-// first square
-
-
-if(currentSquares.length===0){
-
-
-currentSquares.push(location);
-
-
-drawBoard();
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-// second square decides direction
-
-
-if(currentSquares.length===1){
-
-
-
-let first=currentSquares[0];
-
-
-let row1=Math.floor(first/10);
-
-let col1=first%10;
-
-
-
-let row2=Math.floor(location/10);
-
-let col2=location%10;
-
-
-
-
-if(row1===row2){
-
-
-direction="horizontal";
-
-
-}
-
-else if(col1===col2){
-
-
-direction="vertical";
-
-
-}
-
-else{
-
-
-document.getElementById("message").textContent=
-
-"❌ Ships must be straight!";
-
-
-return;
-
-
-}
-
-
-
-
-
-currentSquares.push(location);
-
-
-
-
-if(currentSquares.length===selectedShip.size){
-
-
-completeShip();
-
-
-return;
-
-
-}
-
-
-
-drawBoard();
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-// continue ship
-
-
-let last=currentSquares[currentSquares.length-1];
-
-
-
-let lastRow=Math.floor(last/10);
-
-let lastCol=last%10;
-
-
-
-let newRow=Math.floor(location/10);
-
-let newCol=location%10;
-
-
-
-
-
-if(direction==="horizontal"){
-
-
-if(newRow!==lastRow || Math.abs(newCol-lastCol)!==1){
-
-
-document.getElementById("message").textContent=
-
-"❌ Ships must connect!";
-
-
-return;
-
-
-}
-
-
-}
-
-
-
-
-
-
-if(direction==="vertical"){
-
-
-if(newCol!==lastCol || Math.abs(newRow-lastRow)!==1){
-
-
-document.getElementById("message").textContent=
-
-"❌ Ships must connect!";
-
-
-return;
-
-
-}
-
-
-}
-
-
-
-
-
-currentSquares.push(location);
-
-
-
-
-
-if(currentSquares.length===selectedShip.size){
-
-
-completeShip();
-
-
-return;
-
-
-}
-
-
-
-drawBoard();
-
-
-
-}
-
-
-
-
-
-
-
-
-// ==========================
-// COMPLETE SHIP
-// ==========================
-
-
-function completeShip(){
-
-
-
-shipsPlaced.push({
-
-name:selectedShip.name,
-
-positions:[...currentSquares]
-
-});
-
-
-
-
-document.getElementById(selectedShip.name)
-.innerHTML=
-
-"✅ "+selectedShip.name;
-
-
-
-
-
-removeButton(selectedShip.name);
-
-
-
-
-
-document.getElementById("message").textContent=
-
-"🚢 "+selectedShip.name+" Complete!";
-
-
-
-
-
-selectedShip=null;
-
-currentSquares=[];
-
-direction=null;
-
-
-
-drawBoard();
-
-
-checkReady();
-
-
-}
-
-
-
-
-
-
-
-
-function isOccupied(location){
-
-
-for(let ship of shipsPlaced){
-
-
-if(ship.positions.includes(location)){
-
-
-return true;
-
-
-}
-
-
-}
-
-
-return false;
-
-
-}
-
-
-
-
-
-
-
-
-// ==========================
-// DISPLAY SHIPS
-// ==========================
-
-
-function showShips(){
-
-
-let squares=document.querySelectorAll("#board .square");
-
-
-
-shipsPlaced.forEach(ship=>{
-
-
-ship.positions.forEach(position=>{
-
-
-if(squares[position]){
-
-
-squares[position].classList.add("ship");
-
-
-}
-
-
-});
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-
-function showCurrent(){
-
-
-let squares=document.querySelectorAll("#board .square");
-
-
-
-currentSquares.forEach(position=>{
-
-
-if(squares[position]){
-
-
-squares[position].classList.add("preview");
-
-
-}
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-
-function removeButton(name){
-
-
-document.querySelectorAll("#ships button")
-.forEach(button=>{
-
-
-if(button.textContent.includes(name)){
-
-
-button.remove();
-
-
-}
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-
-// ==========================
-// CONTROLS
-// ==========================
-
-
-function undoSquare(){
-
-
-if(currentSquares.length>0){
-
-
-currentSquares.pop();
-
-
-
-if(currentSquares.length<2){
-
-
-direction=null;
-
-
-}
-
-
-
-drawBoard();
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-function resetShip(){
-
-
-currentSquares=[];
-
-
-direction=null;
-
-
-drawBoard();
-
-
-}
-
-
-
-
-
-
-
-
-function checkReady(){
-
-
-if(shipsPlaced.length===5){
-
-
-document.getElementById("readyButton")
-.style.display="inline-block";
-
-
-
-document.getElementById("message").textContent=
-
-"🚢 Fleet Complete!";
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-function readyUp(){
-
-
-document.getElementById("message").textContent=
-
-"✅ Ready!";
-
-
-
-document.querySelectorAll("#ships button")
-.forEach(button=>{
-
-
-button.disabled=true;
-
-
-});
-
-
-
-startBattle();
-
-
-}
-
-
-// ==========================
-// BATTLE SYSTEM
-// ==========================
-
-
-let attackResults=[];
-
-let selectedAttack=null;
-
-let myTurn=true;
-
-
-
-
-
-
-function startBattle(){
-
-
-document.getElementById("gameScreen")
-.classList.add("hidden");
-
-
-
-document.getElementById("battleScreen")
-.classList.remove("hidden");
-
-
-
-drawYourBattleBoard();
-
-drawAttackBoard();
-
-
-}
-
-
-
-
-
-
-
-
-// ==========================
-// YOUR BOARD IN BATTLE
-// ==========================
-
-
-function drawYourBattleBoard(){
-
-
-let board=document.getElementById("yourBoard");
-
-
-board.innerHTML="";
-
-
-board.className="board";
-
-
-
-board.appendChild(document.createElement("div"));
-
-
-
-letters.forEach(letter=>{
-
-
-let label=document.createElement("div");
-
-
-label.className="label";
-
-
-label.textContent=letter;
-
-
-board.appendChild(label);
-
-
-});
-
-
-
-
-for(let row=0;row<10;row++){
-
-
-let number=document.createElement("div");
-
-
-number.className="label";
-
-
-number.textContent=row+1;
-
-
-board.appendChild(number);
-
-
-
-
-for(let col=0;col<10;col++){
-
-
-let square=document.createElement("div");
-
-
-square.className="square";
-
-
-let location=row*10+col;
-
-
-
-
-if(vocabularyGrid[location]){
-
-
-square.textContent=
-vocabularyGrid[location].value;
-
-
-}
-
-
-
-
-if(isOccupied(location)){
-
-
-square.classList.add("ship");
-
-
-}
-
-
-
-board.appendChild(square);
-
-
-
-}
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-// ==========================
-// ATTACK BOARD
-// ==========================
-
-
-function drawAttackBoard(){
-
-
-let board=document.getElementById("attackBoard");
-
-
-board.innerHTML="";
-
-
-board.className="board";
-
-
-
-board.appendChild(document.createElement("div"));
-
-
-
-letters.forEach(letter=>{
-
-
-let label=document.createElement("div");
-
-
-label.className="label";
-
-
-label.textContent=letter;
-
-
-board.appendChild(label);
-
-
-});
-
-
-
-
-
-for(let row=0;row<10;row++){
-
-
-let number=document.createElement("div");
-
-
-number.className="label";
-
-
-number.textContent=row+1;
-
-
-board.appendChild(number);
-
-
-
-
-for(let col=0;col<10;col++){
-
-
-let square=document.createElement("div");
-
-
-square.className="square";
-
-
-square.textContent="🌊";
-
-
-
-let location=row*10+col;
-
-
-
-square.onclick=function(){
-
-
-attackSquare(location);
-
-
-};
-
-
-
-board.appendChild(square);
-
-
-
-}
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-// ==========================
-// ATTACK ACTION
-// ==========================
-
-
-function attackSquare(location){
-
-
-
-if(!myTurn){
-
-return;
-
-}
-
-
-
-selectedAttack=location;
-
-
-
-let row=Math.floor(location/10)+1;
-
-
-let col=location%10;
-
-
-let coordinate=
-
-letters[col]+row;
-
-
-
-
-document.getElementById("turnMessage")
-.textContent=
-
-"Attack: "+coordinate;
-
-
-
-document.getElementById("challengeBox")
-.classList.remove("hidden");
-
-
-
-let word=vocabularyGrid[location].value;
-
-
-
-document.getElementById("challengeWord")
-.textContent=
-
-"🤟 Sign: "+word;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-// ==========================
-// HIT / MISS
-// ==========================
-
-
-function recordHit(){
-
-
-if(selectedAttack===null){
-
-return;
-
-}
-
-
-
-attackResults[selectedAttack]="hit";
-
-
-
-updateAttackBoard();
-
-
-
-document.getElementById("challengeBox")
-.classList.add("hidden");
-
-
-
-document.getElementById("turnMessage")
-.textContent=
-
-"🎯 HIT!";
-
-
-selectedAttack=null;
-
-
-}
-
-
-
-
-
-
-
-
-function recordMiss(){
-
-
-if(selectedAttack===null){
-
-return;
-
-}
-
-
-
-attackResults[selectedAttack]="miss";
-
-
-
-updateAttackBoard();
-
-
-
-document.getElementById("challengeBox")
-.classList.add("hidden");
-
-
-
-document.getElementById("turnMessage")
-.textContent=
-
-"💦 MISS!";
-
-
-selectedAttack=null;
-
-
-}
-
-
-
-
-
-
-
-
-function updateAttackBoard(){
-
-
-let squares=document.querySelectorAll("#attackBoard .square");
-
-
-
-attackResults.forEach((result,index)=>{
-
-
-if(squares[index]){
-
-
-if(result==="hit"){
-
-
-squares[index].textContent="💥";
-
-squares[index].classList.add("hit");
-
-
-}
-
-
-if(result==="miss"){
-
-
-squares[index].textContent="❌";
-
-squares[index].classList.add("miss");
-
-
-}
-
-
-}
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-// ==========================
-// START GAME
-// ==========================
-
-
-generateVocabularyGrid();
-
-drawBoard();
-
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyD-96f3sXz9pT6AdR6R4yDkMIdXxtGw0l4",
-    authDomain: "asl-battleship.firebaseapp.com",
-    projectId: "asl-battleship",
-    storageBucket: "asl-battleship.firebasestorage.app",
-    messagingSenderId: "885145188874",
-    appId: "1:885145188874:web:1d64fe001a4b9822bc7df3"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
 </script>
-
 
 
 </body>
 
-
 </html>
-
