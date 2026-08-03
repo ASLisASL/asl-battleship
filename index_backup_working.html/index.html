@@ -273,7 +273,7 @@ import { initializeApp }
 from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
 
 
-import { getDatabase, ref, set, get, child, update, onValue }
+import { getDatabase, ref, set, get, child, update } 
 from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
 
 
@@ -395,8 +395,6 @@ window.createGame = async function(){
     <br>
     Waiting for Player 2...
     `;
-
-    watchRoom();
 
 
 
@@ -523,45 +521,6 @@ console.log("UPDATED ROOM:", enteredCode);
 
 
 
-
-// ==========================
-// WATCH FOR PLAYER 2
-// ==========================
-
-function watchRoom(){
-
-    const roomRef = ref(database, "rooms/" + roomCode);
-
-
-    onValue(roomRef, (snapshot)=>{
-
-
-        const data = snapshot.val();
-
-
-        if(data && data.player2 === true){
-
-
-            document.getElementById("playerStatus")
-            .innerHTML =
-
-            `
-            Player 1 ✅
-            <br>
-            Player 2 ✅
-            `;
-
-
-            document.getElementById("startButton")
-            .style.display = "inline-block";
-
-
-        }
-
-
-    });
-
-}
 
 </script>
 
