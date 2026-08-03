@@ -521,6 +521,32 @@ console.log("UPDATED ROOM:", enteredCode);
 
 
 
+// ==========================
+// START GAME
+// ==========================
+
+window.startGame = function(){
+
+    console.log("START GAME CLICKED");
+
+};
+
+
+document.getElementById("startButton").addEventListener("click", function(){
+
+    console.log("START BUTTON WORKS");
+
+    document.getElementById("waitingScreen")
+    .style.display = "none";
+
+
+    document.getElementById("gameScreen")
+    .style.display = "block";
+
+
+});
+console.log("END OF SCRIPT REACHED");
+
 
 </script>
 
