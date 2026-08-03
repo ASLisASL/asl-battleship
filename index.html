@@ -13,69 +13,50 @@
 body{
 
 font-family:Arial,sans-serif;
-
 text-align:center;
-
 background:#e8f6ff;
 
 }
 
 
-
 .panel{
 
 background:white;
-
 border:2px solid #333;
-
 border-radius:12px;
-
 padding:20px;
-
 margin:20px auto;
-
-max-width:800px;
+max-width:900px;
 
 }
-
 
 
 button{
 
 padding:10px 15px;
-
 margin:5px;
-
 font-size:16px;
-
 cursor:pointer;
-
 border-radius:8px;
 
 }
 
 
-
 button:disabled{
 
 opacity:.5;
-
 cursor:not-allowed;
 
 }
 
 
-
 input{
 
 padding:10px;
-
 font-size:18px;
-
 text-align:center;
 
 }
-
 
 
 .hidden{
@@ -85,28 +66,26 @@ display:none;
 }
 
 
-
 .container{
 
 display:flex;
-
 justify-content:center;
-
 gap:40px;
-
 flex-wrap:wrap;
 
 }
 
 
 
-#board{
+/* BOARDS */
+
+.board{
 
 display:grid;
 
-grid-template-columns:35px repeat(10,35px);
+grid-template-columns:40px repeat(10,60px);
 
-grid-template-rows:35px repeat(10,35px);
+grid-template-rows:40px repeat(10,45px);
 
 gap:3px;
 
@@ -121,11 +100,8 @@ margin-top:20px;
 .label{
 
 display:flex;
-
 align-items:center;
-
 justify-content:center;
-
 font-weight:bold;
 
 }
@@ -136,13 +112,16 @@ font-weight:bold;
 
 width:60px;
 height:45px;
+
 font-size:11px;
+
 display:flex;
 align-items:center;
 justify-content:center;
-text-align:center;
-word-break:break-word;
 
+text-align:center;
+
+word-break:break-word;
 
 background:#9edcff;
 
@@ -165,6 +144,23 @@ background:#999;
 .ship{
 
 background:#555;
+color:white;
+
+}
+
+
+
+.hit{
+
+background:red;
+
+}
+
+
+
+.miss{
+
+background:white;
 
 }
 
@@ -173,15 +169,12 @@ background:#555;
 .fleet-item{
 
 font-size:18px;
-
 margin:8px;
 
 }
 
 
-
 </style>
-
 
 </head>
 
@@ -193,7 +186,7 @@ margin:8px;
 
 
 
-<!-- HOME -->
+<!-- HOME SCREEN -->
 
 <div id="homeScreen" class="panel">
 
@@ -226,7 +219,8 @@ Join Game
 
 
 
-<!-- JOIN -->
+<!-- JOIN SCREEN -->
+
 
 <div id="joinScreen" class="panel hidden">
 
@@ -267,7 +261,7 @@ JOIN
 
 <p id="playerStatus">
 
-Waiting for player...
+Waiting...
 
 </p>
 
@@ -285,7 +279,7 @@ START GAME
 
 
 
-<!-- GAME -->
+<!-- FLEET SETUP -->
 
 
 <div id="gameScreen" class="hidden">
@@ -306,8 +300,6 @@ Choose a ship
 
 </h3>
 
-
-<h3 id="progress"></h3>
 
 
 <div id="ships">
@@ -341,6 +333,7 @@ Destroyer (2)
 </div>
 
 
+
 <button onclick="undoSquare()">
 
 ↩ Undo
@@ -369,6 +362,8 @@ Destroyer (2)
 
 
 
+
+
 <div class="panel">
 
 
@@ -379,37 +374,27 @@ Destroyer (2)
 
 
 <div class="fleet-item" id="Carrier">
-
 Carrier ⬜⬜⬜⬜⬜
-
 </div>
 
 
 <div class="fleet-item" id="Battleship">
-
 Battleship ⬜⬜⬜⬜
-
 </div>
 
 
 <div class="fleet-item" id="Cruiser">
-
 Cruiser ⬜⬜⬜
-
 </div>
 
 
 <div class="fleet-item" id="Submarine">
-
 Submarine ⬜⬜⬜
-
 </div>
 
 
 <div class="fleet-item" id="Destroyer">
-
 Destroyer ⬜⬜
-
 </div>
 
 
@@ -422,11 +407,105 @@ Destroyer ⬜⬜
 </div>
 
 
-<div id="board"></div>
+
+<div id="board" class="board"></div>
 
 
 </div>
 
+
+
+
+
+<!-- BATTLE SCREEN -->
+
+
+<div id="battleScreen" class="hidden">
+
+
+<div class="panel">
+
+
+<h2>⚔️ ASL Battleship Battle</h2>
+
+
+<h3 id="turnMessage">
+
+Your Turn!
+
+</h3>
+
+
+
+<div class="container">
+
+
+
+<div class="panel">
+
+
+<h3>Your Board</h3>
+
+
+<div id="yourBoard" class="board"></div>
+
+
+</div>
+
+
+
+
+<div class="panel">
+
+
+<h3>Attack Board</h3>
+
+
+<div id="attackBoard" class="board"></div>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div id="challengeBox" class="panel hidden">
+
+
+<h2 id="challengeWord">
+
+</h2>
+
+
+
+<button onclick="recordHit()">
+
+🎯 HIT
+
+</button>
+
+
+
+<button onclick="recordMiss()">
+
+💦 MISS
+
+</button>
+
+
+
+</div>
+
+
+</div>
 
 <script>
 
@@ -436,11 +515,11 @@ Destroyer ⬜⬜
 // ==========================
 
 
-let roomCode = "";
+let roomCode="";
 
-let isHost = false;
+let isHost=false;
 
-let playerJoined = false;
+let playerJoined=false;
 
 
 
@@ -463,7 +542,12 @@ document.getElementById("gameScreen")
 .classList.add("hidden");
 
 
+document.getElementById("battleScreen")
+.classList.add("hidden");
+
+
 }
+
 
 
 
@@ -476,7 +560,7 @@ function createGame(){
 isHost=true;
 
 
-roomCode = generateCode();
+roomCode=generateCode();
 
 
 
@@ -489,13 +573,13 @@ document.getElementById("waitingScreen")
 
 
 
-document.getElementById("roomDisplay").textContent =
+document.getElementById("roomDisplay").textContent=
 
-"Room Code: " + roomCode;
+"Room Code: "+roomCode;
 
 
 
-document.getElementById("playerStatus").innerHTML =
+document.getElementById("playerStatus").innerHTML=
 
 `
 Player 1 ✅
@@ -506,6 +590,7 @@ Player 2 ⏳ Waiting...
 
 
 }
+
 
 
 
@@ -534,7 +619,7 @@ document.getElementById("joinScreen")
 function joinGame(){
 
 
-let entered =
+let entered=
 
 document.getElementById("joinCode")
 .value
@@ -543,8 +628,7 @@ document.getElementById("joinCode")
 
 
 
-
-if(entered !== roomCode){
+if(entered!==roomCode){
 
 
 alert("Room not found");
@@ -570,13 +654,13 @@ document.getElementById("waitingScreen")
 
 
 
-document.getElementById("roomDisplay").textContent =
+document.getElementById("roomDisplay").textContent=
 
-"Room Code: " + roomCode;
+"Room Code: "+roomCode;
 
 
 
-document.getElementById("playerStatus").innerHTML =
+document.getElementById("playerStatus").innerHTML=
 
 `
 Player 1 ✅
@@ -590,8 +674,8 @@ document.getElementById("startButton")
 .style.display="inline-block";
 
 
-
 }
+
 
 
 
@@ -602,7 +686,7 @@ document.getElementById("startButton")
 function generateCode(){
 
 
-let characters =
+let characters=
 "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 
@@ -613,15 +697,12 @@ let result="";
 for(let i=0;i<5;i++){
 
 
-result += characters[
-
+result+=characters[
 Math.floor(Math.random()*characters.length)
-
 ];
 
 
 }
-
 
 
 return result;
@@ -647,6 +728,9 @@ document.getElementById("gameScreen")
 
 
 
+generateVocabularyGrid();
+
+
 drawBoard();
 
 
@@ -654,26 +738,10 @@ drawBoard();
 
 
 
-// ==========================
-// BATTLESHIP SETUP
-// ==========================
 
 
-const letters=[
-
-"A","B","C","D","E",
-"F","G","H","I","J"
-
-];
 
 
-let selectedShip=null;
-
-let currentSquares=[];
-
-let shipsPlaced=[];
-
-let direction=null;
 
 // ==========================
 // ASL VOCABULARY SYSTEM
@@ -686,49 +754,72 @@ let vocabularyGrid=[];
 
 const vocabularyWords=[
 
+
 "APPLE",
 "BANANA",
 "PIZZA",
 "MILK",
 "HAMBURGER",
 "COOKIE",
+
+
 "DOG",
 "CAT",
 "FISH",
 "BIRD",
 "HORSE",
 "TIGER",
+
+
 "BOOK",
 "PENCIL",
 "TEACHER",
 "STUDENT",
 "CHAIR",
 "TABLE",
+
+
 "RED",
 "BLUE",
 "GREEN",
 "YELLOW",
+
+
 "MOTHER",
 "FATHER",
 "SISTER",
 "BROTHER",
+
+
 "HOUSE",
 "CAR",
 "TREE",
 "WATER"
 
+
 ];
+
+
 
 
 
 let numberWords=[];
 
 
+
 for(let i=0;i<=100;i++){
+
 
 numberWords.push(i.toString());
 
+
 }
+
+
+
+
+
+
 
 function generateVocabularyGrid(){
 
@@ -740,6 +831,7 @@ let pool=[
 ...numberWords
 
 ];
+
 
 
 // shuffle
@@ -769,7 +861,36 @@ value:pool[i]
 
 }
 
+// ==========================
+// BATTLESHIP SYSTEM
+// ==========================
 
+
+const letters=[
+
+"A","B","C","D","E",
+"F","G","H","I","J"
+
+];
+
+
+
+let selectedShip=null;
+
+let currentSquares=[];
+
+let shipsPlaced=[];
+
+let direction=null;
+
+
+
+
+
+
+// ==========================
+// DRAW YOUR BOARD
+// ==========================
 
 
 function drawBoard(){
@@ -831,7 +952,6 @@ board.appendChild(number);
 for(let col=0;col<10;col++){
 
 
-
 let square=document.createElement("div");
 
 
@@ -845,16 +965,19 @@ let location=row*10+col;
 
 square.onclick=function(){
 
+
 placeSquare(location);
 
+
 };
+
 
 
 
 if(vocabularyGrid[location]){
 
 
-square.textContent =
+square.textContent=
 vocabularyGrid[location].value;
 
 
@@ -868,7 +991,6 @@ board.appendChild(square);
 
 
 }
-
 
 
 }
@@ -889,6 +1011,11 @@ showCurrent();
 
 
 
+// ==========================
+// SELECT SHIP
+// ==========================
+
+
 function selectShip(name,size){
 
 
@@ -903,7 +1030,6 @@ size:size
 
 
 currentSquares=[];
-
 
 direction=null;
 
@@ -925,6 +1051,11 @@ drawBoard();
 
 
 
+
+
+// ==========================
+// PLACE SHIP
+// ==========================
 
 
 function placeSquare(location){
@@ -949,13 +1080,12 @@ return;
 
 
 
-
 if(isOccupied(location)){
 
 
 document.getElementById("message").textContent=
 
-"❌ Ship already there!";
+"❌ Ship already here!";
 
 
 return;
@@ -985,7 +1115,6 @@ return;
 
 
 }
-
 
 
 
@@ -1054,7 +1183,6 @@ currentSquares.push(location);
 
 
 
-
 if(currentSquares.length===selectedShip.size){
 
 
@@ -1075,7 +1203,6 @@ return;
 
 
 }
-
 
 
 
@@ -1104,17 +1231,10 @@ let newCol=location%10;
 
 
 
-
 if(direction==="horizontal"){
 
 
-if(
-
-newRow!==lastRow ||
-
-Math.abs(newCol-lastCol)!==1
-
-){
+if(newRow!==lastRow || Math.abs(newCol-lastCol)!==1){
 
 
 document.getElementById("message").textContent=
@@ -1138,13 +1258,7 @@ return;
 if(direction==="vertical"){
 
 
-if(
-
-newCol!==lastCol ||
-
-Math.abs(newRow-lastRow)!==1
-
-){
+if(newCol!==lastCol || Math.abs(newRow-lastRow)!==1){
 
 
 document.getElementById("message").textContent=
@@ -1183,7 +1297,6 @@ return;
 
 
 
-
 drawBoard();
 
 
@@ -1197,6 +1310,10 @@ drawBoard();
 
 
 
+// ==========================
+// COMPLETE SHIP
+// ==========================
+
 
 function completeShip(){
 
@@ -1209,7 +1326,6 @@ name:selectedShip.name,
 positions:[...currentSquares]
 
 });
-
 
 
 
@@ -1239,9 +1355,7 @@ document.getElementById("message").textContent=
 
 selectedShip=null;
 
-
 currentSquares=[];
-
 
 direction=null;
 
@@ -1250,13 +1364,10 @@ direction=null;
 drawBoard();
 
 
-
 checkReady();
 
 
-
 }
-
 
 
 
@@ -1283,7 +1394,6 @@ return true;
 }
 
 
-
 return false;
 
 
@@ -1296,12 +1406,15 @@ return false;
 
 
 
+// ==========================
+// DISPLAY SHIPS
+// ==========================
+
 
 function showShips(){
 
 
-let squares=document.querySelectorAll(".square");
-
+let squares=document.querySelectorAll("#board .square");
 
 
 
@@ -1320,7 +1433,6 @@ squares[position].classList.add("ship");
 }
 
 
-
 });
 
 
@@ -1336,11 +1448,10 @@ squares[position].classList.add("ship");
 
 
 
-
 function showCurrent(){
 
 
-let squares=document.querySelectorAll(".square");
+let squares=document.querySelectorAll("#board .square");
 
 
 
@@ -1360,7 +1471,6 @@ squares[position].classList.add("preview");
 
 
 }
-
 
 
 
@@ -1397,6 +1507,10 @@ button.remove();
 
 
 
+// ==========================
+// CONTROLS
+// ==========================
+
 
 function undoSquare(){
 
@@ -1432,7 +1546,6 @@ drawBoard();
 
 
 
-
 function resetShip(){
 
 
@@ -1442,12 +1555,10 @@ currentSquares=[];
 direction=null;
 
 
-
 drawBoard();
 
 
 }
-
 
 
 
@@ -1483,22 +1594,494 @@ document.getElementById("message").textContent=
 
 
 
-
 function readyUp(){
-
 
 
 document.getElementById("message").textContent=
 
-"✅ Ready! Waiting for opponent...";
+"✅ Ready!";
 
 
 
-document.querySelectorAll("button")
+document.querySelectorAll("#ships button")
 .forEach(button=>{
 
 
 button.disabled=true;
+
+
+});
+
+
+
+startBattle();
+
+
+}
+
+
+// ==========================
+// BATTLE SYSTEM
+// ==========================
+
+
+let attackResults=[];
+
+let selectedAttack=null;
+
+let myTurn=true;
+
+
+
+
+
+
+function startBattle(){
+
+
+document.getElementById("gameScreen")
+.classList.add("hidden");
+
+
+
+document.getElementById("battleScreen")
+.classList.remove("hidden");
+
+
+
+drawYourBattleBoard();
+
+drawAttackBoard();
+
+
+}
+
+
+
+
+
+
+
+
+// ==========================
+// YOUR BOARD IN BATTLE
+// ==========================
+
+
+function drawYourBattleBoard(){
+
+
+let board=document.getElementById("yourBoard");
+
+
+board.innerHTML="";
+
+
+board.className="board";
+
+
+
+board.appendChild(document.createElement("div"));
+
+
+
+letters.forEach(letter=>{
+
+
+let label=document.createElement("div");
+
+
+label.className="label";
+
+
+label.textContent=letter;
+
+
+board.appendChild(label);
+
+
+});
+
+
+
+
+for(let row=0;row<10;row++){
+
+
+let number=document.createElement("div");
+
+
+number.className="label";
+
+
+number.textContent=row+1;
+
+
+board.appendChild(number);
+
+
+
+
+for(let col=0;col<10;col++){
+
+
+let square=document.createElement("div");
+
+
+square.className="square";
+
+
+let location=row*10+col;
+
+
+
+
+if(vocabularyGrid[location]){
+
+
+square.textContent=
+vocabularyGrid[location].value;
+
+
+}
+
+
+
+
+if(isOccupied(location)){
+
+
+square.classList.add("ship");
+
+
+}
+
+
+
+board.appendChild(square);
+
+
+
+}
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// ATTACK BOARD
+// ==========================
+
+
+function drawAttackBoard(){
+
+
+let board=document.getElementById("attackBoard");
+
+
+board.innerHTML="";
+
+
+board.className="board";
+
+
+
+board.appendChild(document.createElement("div"));
+
+
+
+letters.forEach(letter=>{
+
+
+let label=document.createElement("div");
+
+
+label.className="label";
+
+
+label.textContent=letter;
+
+
+board.appendChild(label);
+
+
+});
+
+
+
+
+
+for(let row=0;row<10;row++){
+
+
+let number=document.createElement("div");
+
+
+number.className="label";
+
+
+number.textContent=row+1;
+
+
+board.appendChild(number);
+
+
+
+
+for(let col=0;col<10;col++){
+
+
+let square=document.createElement("div");
+
+
+square.className="square";
+
+
+square.textContent="🌊";
+
+
+
+let location=row*10+col;
+
+
+
+square.onclick=function(){
+
+
+attackSquare(location);
+
+
+};
+
+
+
+board.appendChild(square);
+
+
+
+}
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// ATTACK ACTION
+// ==========================
+
+
+function attackSquare(location){
+
+
+
+if(!myTurn){
+
+return;
+
+}
+
+
+
+selectedAttack=location;
+
+
+
+let row=Math.floor(location/10)+1;
+
+
+let col=location%10;
+
+
+let coordinate=
+
+letters[col]+row;
+
+
+
+
+document.getElementById("turnMessage")
+.textContent=
+
+"Attack: "+coordinate;
+
+
+
+document.getElementById("challengeBox")
+.classList.remove("hidden");
+
+
+
+let word=vocabularyGrid[location].value;
+
+
+
+document.getElementById("challengeWord")
+.textContent=
+
+"🤟 Sign: "+word;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// HIT / MISS
+// ==========================
+
+
+function recordHit(){
+
+
+if(selectedAttack===null){
+
+return;
+
+}
+
+
+
+attackResults[selectedAttack]="hit";
+
+
+
+updateAttackBoard();
+
+
+
+document.getElementById("challengeBox")
+.classList.add("hidden");
+
+
+
+document.getElementById("turnMessage")
+.textContent=
+
+"🎯 HIT!";
+
+
+selectedAttack=null;
+
+
+}
+
+
+
+
+
+
+
+
+function recordMiss(){
+
+
+if(selectedAttack===null){
+
+return;
+
+}
+
+
+
+attackResults[selectedAttack]="miss";
+
+
+
+updateAttackBoard();
+
+
+
+document.getElementById("challengeBox")
+.classList.add("hidden");
+
+
+
+document.getElementById("turnMessage")
+.textContent=
+
+"💦 MISS!";
+
+
+selectedAttack=null;
+
+
+}
+
+
+
+
+
+
+
+
+function updateAttackBoard(){
+
+
+let squares=document.querySelectorAll("#attackBoard .square");
+
+
+
+attackResults.forEach((result,index)=>{
+
+
+if(squares[index]){
+
+
+if(result==="hit"){
+
+
+squares[index].textContent="💥";
+
+squares[index].classList.add("hit");
+
+
+}
+
+
+if(result==="miss"){
+
+
+squares[index].textContent="❌";
+
+squares[index].classList.add("miss");
+
+
+}
+
+
+}
 
 
 });
@@ -1512,14 +2095,35 @@ button.disabled=true;
 
 
 
+// ==========================
+// START GAME
+// ==========================
+
 
 generateVocabularyGrid();
 
 drawBoard();
 
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyD-96f3sXz9pT6AdR6R4yDkMIdXxtGw0l4",
+    authDomain: "asl-battleship.firebaseapp.com",
+    projectId: "asl-battleship",
+    storageBucket: "asl-battleship.firebasestorage.app",
+    messagingSenderId: "885145188874",
+    appId: "1:885145188874:web:1d64fe001a4b9822bc7df3"
+  };
 
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
 </script>
+
 
 
 </body>
